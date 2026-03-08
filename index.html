@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Berry Lane Saloon - POS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rye&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --wood-dark: #241c15;
+            --wood-medium: #3b2f25;
+            --gold: #d1b26f;
+            --parchment: #e3d5b8;
+            --red: #7b1e1a;
+            --red-bright: #a32620;
+            --green: #1a472a;
+            --green-bright: #2d6a41;
+        }
+
+        body {
+            background-color: var(--wood-medium);
+            background-image: url('https://www.transparenttextures.com/patterns/wood-pattern.png');
+            color: var(--parchment);
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .pos-container {
+            background-color: var(--wood-dark);
+            border: 4px solid #634b35;
+            box-shadow: 0 0 25px rgba(0,0,0,0.9);
+            width: 100%;
+            max-width: 1000px;
+            border-radius: 8px;
+            padding: 25px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-family: 'Rye', cursive;
+            font-size: 2.5em;
+            text-align: center;
+            color: var(--gold);
+            margin: 0 0 20px 0;
+            border-bottom: 2px solid #634b35;
+            padding-bottom: 10px;
+        }
+
+        /* --- STYLIZACJA MODALA (NOWE!) --- */
+        #modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .custom-modal {
+            background-color: var(--wood-dark);
+            background-image: url('https://www.transparenttextures.com/patterns/wood-pattern.png');
+            border: 3px solid var(--gold);
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 0 50px rgba(0,0,0,1);
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .custom-modal h2 { font-family: 'Rye', cursive; color: var(--gold); margin-top: 0; }
+        .custom-modal p { margin: 20px 0; line-height: 1.5; color: var(--parchment); }
+
+        .modal-btns { display: flex; gap: 10px; justify-content: center; }
+        
+        /* Przyciski w modalu */
+        .m-btn {
+            padding: 12px 25px;
+            font-family: 'Rye', cursive;
+            border: 2px solid #000;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .m-btn-yes { background-color: var(--green); color: white; }
+        .m-btn-yes:hover { background-color: var(--green-bright); box-shadow: 0 0 15px var(--green); }
+        
+        .m-btn-no { background-color: #444; color: #ccc; }
+        .m-btn-no:hover { background-color: #666; color: white; }
+
+        /* --- PRZYCISKI AKCJI --- */
+        button { cursor: pointer; transition: all 0.2s; outline: none; }
+        button:active { transform: translateY(3px) scale(0.98); }
+
+        .product-btn { background-color: #4a3625; border: 1px solid #634b35; color: #e3d5b8; padding: 15px; border-radius: 5px; text-align: left; }
+        .product-btn:hover { background-color: #5c4533; border-color: var(--gold); transform: scale(1.02); }
+        .product-btn strong { display: block; font-family: 'Rye', cursive; font-size: 1.1em; color: #fff; margin-bottom: 5px; }
+
+        .sell-btn { background-color: var(--green); color: #fff; font-family: 'Rye', cursive; border: 2px solid #000; padding: 15px; font-size: 1.2em; border-radius: 3px; box-shadow: 0 4px 0 #0d2616; width: 100%; }
+        .sell-btn:hover { background-color: var(--green-bright); box-shadow: 0 4px 0 #0d2616, 0 0 15px rgba(45, 106, 65, 0.6); border-color: var(--gold); }
+
+        .clear-btn { background-color: var(--red); color: #fff; border: 2px solid #000; padding: 10px; margin-top: 10px; font-family: 'Rye', cursive; border-radius: 3px; width: 100%; }
+        .clear-btn:hover { background-color: var(--red-bright); transform: scale(1.02); }
+
+        .archive-btn { background-color: #5c3a21; color: #d4c4a8; border: 2px solid var(--gold); padding: 15px; font-family: 'Rye', cursive; width: 100%; }
+        .archive-btn:hover { background-color: #7b4f2d; color: #fff; box-shadow: 0 0 20px rgba(209, 178, 111, 0.4); }
+
+        .reset-stats-btn { background-color: transparent; color: var(--red); border: 1px solid var(--red); padding: 8px; font-family: 'Rye', cursive; font-size: 0.7em; margin-top: 10px; width: 100%; }
+        .reset-stats-btn:hover { background-color: var(--red); color: #fff; }
+
+        /* --- RESZTA UKŁADU --- */
+        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #634b35; }
+        .tab-btn { background: transparent; border: none; color: #997b5e; padding: 10px 20px; font-family: 'Rye', cursive; font-size: 1.2em; }
+        .tab-btn.active { color: var(--gold); border-bottom: 3px solid var(--gold); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .pos-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .products-section { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .receipt-section { background-color: rgba(0,0,0,0.6); border: 2px solid #4a3625; padding: 15px; border-radius: 5px; }
+        .receipt-section ul { list-style: none; padding: 0; min-height: 250px; border-bottom: 1px dashed #634b35; }
+        .receipt-section li { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95em; }
+        .total-row { font-size: 1.3em; font-weight: bold; color: var(--gold); display: flex; justify-content: space-between; margin-bottom: 15px; font-family: 'Rye', cursive; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .summary-box { background-color: var(--green); border: 1px solid var(--gold); padding: 15px; border-radius: 5px; text-align: center; margin-bottom: 20px; }
+        .big-total { font-size: 2.5em; color: var(--gold); font-family: 'Rye', cursive; margin: 0; }
+        .stats-panel { background-color: #17120e; border: 1px solid #634b35; padding: 15px; border-radius: 3px; }
+        .kitchen-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .recipe-card { background: var(--parchment); color: #241c15; padding: 15px; border-radius: 3px; border: 1px solid #634b35; }
+        .recipe-card h3 { color: #5c3a21; border-bottom: 1px solid #5c3a21; margin: 0 0 5px 0; font-family: 'Rye'; font-size: 1.2em; text-shadow: none; }
+        .history-list { max-height: 300px; overflow-y: auto; }
+        .history-item { background: rgba(255,255,255,0.05); border-left: 4px solid var(--gold); padding: 10px; margin-bottom: 10px; font-size: 0.85em; }
+        .label { color: var(--gold); font-family: 'Rye', cursive; margin-right: 5px; }
+        .session-info { font-size: 0.8em; text-align: center; color: var(--gold); background: rgba(0,0,0,0.3); padding: 8px; margin-bottom: 20px; border: 1px solid #634b35; font-family: 'Rye'; }
+        
+        @media screen and (max-width: 800px) {
+            .pos-grid, .stats-grid, .kitchen-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="modal-overlay">
+        <div class="custom-modal">
+            <h2 id="modal-title">Potwierdzenie</h2>
+            <p id="modal-message">Czy na pewno chcesz to zrobić?</p>
+            <div class="modal-btns">
+                <button class="m-btn m-btn-yes" id="modal-confirm-btn">TAK</button>
+                <button class="m-btn m-btn-no" onclick="closeModal()">NIE</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="pos-container">
+        <h1>The Berry Lane Saloon</h1>
+        <div id="session-display" class="session-info">Ładowanie...</div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('pos')">Kasa</button>
+            <button class="tab-btn" onclick="switchTab('ledger')">Księga</button>
+            <button class="tab-btn" onclick="switchTab('kitchen')">Kuchnia</button>
+        </div>
+
+        <div id="tab-pos" class="tab-content active">
+            <div class="pos-grid">
+                <div class="products-section" id="products">
+                    </div>
+                <div class="receipt-section">
+                    <h3 style="text-align:center; font-family:Rye; color:var(--gold);">Rachunek</h3>
+                    <ul id="receipt-items"></ul>
+                    <div class="total-row"><span>SUMA:</span><span id="receipt-total">$0.00</span></div>
+                    <button class="sell-btn" onclick="completeSale()">ZATWIERDŹ SPRZEDAŻ</button>
+                    <button class="clear-btn" onclick="clearReceipt()">WYCZYŚĆ MENU</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-ledger" class="tab-content">
+            <div class="summary-box"><h2>Utarg (Brutto)</h2><p class="big-total" id="total-revenue">$0.00</p></div>
+            <div class="stats-grid">
+                <div class="stats-panel">
+                    <h3>Statystyki Towarów</h3>
+                    <ul id="items-sold-list" style="list-style:none; padding:0;"></ul>
+                    <div style="border-top:2px solid var(--gold); margin-top:10px; padding-top:10px;">
+                        <div style="display:flex; justify-content:space-between;"><span>SUMA:</span><span id="list-total-sum">$0.00</span></div>
+                        <div style="display:flex; justify-content:space-between; color:#ff9999;"><span>Podatek 10%:</span><span id="tax-amount">-$0.00</span></div>
+                        <div style="display:flex; justify-content:space-between; color:#aaffaa;"><span>ZYSK NETTO:</span><span id="net-profit">$0.00</span></div>
+                    </div>
+                </div>
+                <div class="stats-panel">
+                    <h3>Historia: <span id="session-name-title">...</span></h3>
+                    <div class="history-list" id="transaction-history"></div>
+                    <button class="archive-btn" style="margin-top:15px;" onclick="archiveCurrentSession()">NOWA ZMIANA</button>
+                    <button class="reset-stats-btn" onclick="globalStatsReset()">RESET 2-TYGODNIOWY</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-kitchen" class="tab-content">
+            <div class="kitchen-grid" id="kitchen-recipes">
+                </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, query, orderBy, setDoc, doc, getDoc, updateDoc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "TWÓJ_API_KEY",
+            authDomain: "TWOJ_PROJEKT.firebaseapp.com",
+            projectId: "TWOJ_PROJEKT",
+            storageBucket: "TWOJ_PROJEKT.appspot.com",
+            messagingSenderId: "TWOJ_SENDER_ID",
+            appId: "TWOJE_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- MENU I PRZEPISY ---
+        const menuData = [
+            { n: 'Whisky', p: 4, r: '2x Kukurydza, 1x Woda' },
+            { n: 'Piwo', p: 3, r: '2x Pszenica, 1x Woda' },
+            { n: 'Zupa warzywna', p: 5, r: '2x Marchewka, 2x Ziemniak' },
+            { n: 'Ciasto jagody', p: 6, r: '2x Pszenica, 2x Mleko, 2x Jajko, 2x Jagoda' },
+            { n: 'Kawa', p: 2, r: '2x Woda' },
+            { n: 'Wino', p: 3, r: '2x Jabłko, 1x Woda' },
+            { n: 'Śniadanie', p: 6, r: '2x Mięso, 1x Jajko, 1x Woda' },
+            { n: 'Ryba / Ziemniak', p: 6, r: '3x Ryba, 2x Ziemniak' },
+            { n: 'Ciasto kura', p: 7, r: '2x Drób, 2x Pszenica, 2x Jajko' },
+            { n: 'Piwo malina', p: 4, r: '2x Malina, 1x Woda' },
+            { n: 'Placek wołowy', p: 8, r: '2x Wołowina, 2x Pszenica, 2x Jajko' }
+        ];
+
+        // --- GENEROWANIE UI ---
+        const prodDiv = document.getElementById('products');
+        const kitDiv = document.getElementById('kitchen-recipes');
+        menuData.forEach(m => {
+            prodDiv.innerHTML += `<button class="product-btn" onclick="addToReceipt('${m.n}', ${m.p})"><strong>${m.n}</strong><span>$${m.p}.00</span></button>`;
+            kitDiv.innerHTML += `<div class="recipe-card"><h3>${m.n}</h3><ul><li>${m.r}</li></ul></div>`;
+        });
+
+        // --- LOGIKA MODALA ---
+        window.openModal = (title, msg, onConfirm) => {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-message').innerText = msg;
+            document.getElementById('modal-overlay').style.display = 'flex';
+            document.getElementById('modal-confirm-btn').onclick = () => {
+                onConfirm();
+                closeModal();
+            };
+        };
+
+        window.closeModal = () => { document.getElementById('modal-overlay').style.display = 'none'; };
+
+        // --- LOGIKA POS ---
+        let activeSessionName = "Zmiana_1";
+        let statsStartTime = null;
+
+        async function init() {
+            const snap = await getDoc(doc(db, "pos_metadata", "current_session"));
+            if(snap.exists()){
+                const d = snap.data();
+                activeSessionName = "Zmiana_nr_" + (d.sessionNumber || 1);
+                statsStartTime = d.globalStatsResetTime ? d.globalStatsResetTime.toDate() : new Date(0);
+            } else {
+                statsStartTime = new Date();
+                await setDoc(doc(db, "pos_metadata", "current_session"), { sessionNumber: 1, globalStatsResetTime: serverTimestamp() });
+                activeSessionName = "Zmiana_nr_1";
+            }
+            document.getElementById('session-display').innerText = "BIEŻĄCA: " + activeSessionName;
+            document.getElementById('session-name-title').innerText = activeSessionName;
+            startListen();
+        }
+        init();
+
+        window.switchTab = (n) => {
+            document.querySelectorAll('.tab-content, .tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-'+n).classList.add('active');
+            event.currentTarget.classList.add('active');
+        };
+
+        let currentReceipt = [];
+        let currentTotal = 0;
+
+        window.addToReceipt = (name, price) => {
+            const item = currentReceipt.find(i => i.name === name);
+            if(item) item.quantity++; else currentReceipt.push({name, price, quantity: 1});
+            currentTotal += price;
+            updateUI();
+        };
+
+        window.clearReceipt = () => { currentReceipt = []; currentTotal = 0; updateUI(); };
+
+        function updateUI() {
+            const l = document.getElementById('receipt-items');
+            l.innerHTML = '';
+            currentReceipt.forEach(i => {
+                l.innerHTML += `<li><span><span style="color:var(--gold); font-weight:bold;">${i.quantity}x</span> ${i.name}</span><span>$${(i.price*i.quantity).toFixed(2)}</span></li>`;
+            });
+            document.getElementById('receipt-total').innerText = `$${currentTotal.toFixed(2)}`;
+        }
+
+        window.completeSale = async () => {
+            if(!currentReceipt.length) return;
+            const toSave = [...currentReceipt], total = currentTotal;
+            clearReceipt();
+            try {
+                const now = new Date();
+                const id = activeSessionName + "_" + now.getHours() + "-" + now.getMinutes() + "-" + now.getSeconds();
+                await setDoc(doc(db, "berry_lane_pos", id), {
+                    customer: "Clara Lane",
+                    items: toSave,
+                    totalPrice: total,
+                    sessionName: activeSessionName,
+                    createdAt: serverTimestamp()
+                });
+            } catch(e) { console.error(e); }
+        };
+
+        // ZMIENIONE: Użycie nowego Modala zamiast confirm()
+        window.archiveCurrentSession = () => {
+            openModal("Zakończ Zmianę", `Czy chcesz zakończyć ${activeSessionName} i rozpocząć nową?`, async () => {
+                await updateDoc(doc(db, "pos_metadata", "current_session"), { sessionNumber: increment(1) });
+                location.reload();
+            });
+        };
+
+        window.globalStatsReset = () => {
+            openModal("Wielki Reset", "Wyzerować globalne statystyki (podatek i towary)?", async () => {
+                await updateDoc(doc(db, "pos_metadata", "current_session"), { globalStatsResetTime: serverTimestamp() });
+                location.reload();
+            });
+        };
+
+        function startListen() {
+            onSnapshot(query(collection(db, "berry_lane_pos"), orderBy("createdAt", "desc")), (s) => {
+                let gRev = 0, iStats = {}, hist = '';
+                s.forEach(doc => {
+                    const d = doc.data();
+                    if(!d.createdAt) return;
+                    const date = d.createdAt.toDate();
+                    if(date >= statsStartTime){
+                        gRev += d.totalPrice;
+                        d.items.forEach(i => {
+                            if(!iStats[i.name]) iStats[i.name] = {q: 0, r: 0};
+                            iStats[i.name].q += i.quantity;
+                            iStats[i.name].r += (i.price * i.quantity);
+                        });
+                    }
+                    if(d.sessionName === activeSessionName){
+                        let itemsHtml = '<ul>';
+                        d.items.forEach(i => itemsHtml += `<li>${i.quantity}x ${i.name}</li>`);
+                        hist += `<div class="history-item"><span class="label">Kto:</span> Clara Lane<br><span class="label">Data:</span> ${date.toLocaleTimeString()}<br>${itemsHtml}</ul><span class="label">Suma:</span> $${d.totalPrice.toFixed(2)}</div>`;
+                    }
+                });
+                const tax = gRev * 0.1;
+                document.getElementById('total-revenue').innerText = `$${gRev.toFixed(2)}`;
+                document.getElementById('list-total-sum').innerText = `$${gRev.toFixed(2)}`;
+                document.getElementById('tax-amount').innerText = `-$${tax.toFixed(2)}`;
+                document.getElementById('net-profit').innerText = `$${(gRev - tax).toFixed(2)}`;
+                document.getElementById('transaction-history').innerHTML = hist || '<p style="text-align:center; opacity:0.5;">Brak transakcji...</p>';
+                document.getElementById('items-sold-list').innerHTML = Object.entries(iStats).sort((a,b)=>b[1].r - a[1].r).map(([n,d])=>`<li><span>${n} (<span style="color:var(--gold);">${d.q}</span>)</span><span style="color:#fff;">$${d.r.toFixed(2)}</span></li>`).join('');
+            });
+        }
+    </script>
+</body>
+</html>
