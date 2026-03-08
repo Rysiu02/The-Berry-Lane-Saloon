@@ -49,7 +49,7 @@
             padding-bottom: 10px;
         }
 
-        /* --- STYLIZACJA MODALA (NOWE!) --- */
+        /* --- MODAL --- */
         #modal-overlay {
             display: none;
             position: fixed;
@@ -80,73 +80,71 @@
         }
 
         .custom-modal h2 { font-family: 'Rye', cursive; color: var(--gold); margin-top: 0; }
-        .custom-modal p { margin: 20px 0; line-height: 1.5; color: var(--parchment); }
-
-        .modal-btns { display: flex; gap: 10px; justify-content: center; }
+        .modal-btns { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
         
-        /* Przyciski w modalu */
-        .m-btn {
-            padding: 12px 25px;
-            font-family: 'Rye', cursive;
-            border: 2px solid #000;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
+        .m-btn { padding: 12px 25px; font-family: 'Rye', cursive; border: 2px solid #000; border-radius: 4px; cursor: pointer; }
         .m-btn-yes { background-color: var(--green); color: white; }
-        .m-btn-yes:hover { background-color: var(--green-bright); box-shadow: 0 0 15px var(--green); }
-        
         .m-btn-no { background-color: #444; color: #ccc; }
-        .m-btn-no:hover { background-color: #666; color: white; }
 
-        /* --- PRZYCISKI AKCJI --- */
-        button { cursor: pointer; transition: all 0.2s; outline: none; }
+        /* --- PRZYCISKI --- */
+        button { cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); outline: none; }
         button:active { transform: translateY(3px) scale(0.98); }
 
-        .product-btn { background-color: #4a3625; border: 1px solid #634b35; color: #e3d5b8; padding: 15px; border-radius: 5px; text-align: left; }
+        .product-btn {
+            background-color: #4a3625;
+            border: 1px solid #634b35;
+            color: #e3d5b8;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: left;
+        }
+
         .product-btn:hover { background-color: #5c4533; border-color: var(--gold); transform: scale(1.02); }
         .product-btn strong { display: block; font-family: 'Rye', cursive; font-size: 1.1em; color: #fff; margin-bottom: 5px; }
 
         .sell-btn { background-color: var(--green); color: #fff; font-family: 'Rye', cursive; border: 2px solid #000; padding: 15px; font-size: 1.2em; border-radius: 3px; box-shadow: 0 4px 0 #0d2616; width: 100%; }
-        .sell-btn:hover { background-color: var(--green-bright); box-shadow: 0 4px 0 #0d2616, 0 0 15px rgba(45, 106, 65, 0.6); border-color: var(--gold); }
+        .sell-btn:hover { background-color: var(--green-bright); border-color: var(--gold); box-shadow: 0 4px 0 #0d2616, 0 0 15px rgba(45, 106, 65, 0.6); }
 
         .clear-btn { background-color: var(--red); color: #fff; border: 2px solid #000; padding: 10px; margin-top: 10px; font-family: 'Rye', cursive; border-radius: 3px; width: 100%; }
-        .clear-btn:hover { background-color: var(--red-bright); transform: scale(1.02); }
-
         .archive-btn { background-color: #5c3a21; color: #d4c4a8; border: 2px solid var(--gold); padding: 15px; font-family: 'Rye', cursive; width: 100%; }
-        .archive-btn:hover { background-color: #7b4f2d; color: #fff; box-shadow: 0 0 20px rgba(209, 178, 111, 0.4); }
+        .reset-stats-btn { background-color: transparent; color: var(--red); border: 1px solid var(--red); padding: 8px; font-family: 'Rye', cursive; font-size: 0.7em; margin-top: 10px; width: 100%; opacity: 0.6; }
+        .reset-stats-btn:hover { opacity: 1; background: var(--red); color: white; }
 
-        .reset-stats-btn { background-color: transparent; color: var(--red); border: 1px solid var(--red); padding: 8px; font-family: 'Rye', cursive; font-size: 0.7em; margin-top: 10px; width: 100%; }
-        .reset-stats-btn:hover { background-color: var(--red); color: #fff; }
-
-        /* --- RESZTA UKŁADU --- */
+        /* --- TABS & LAYOUT --- */
         .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #634b35; }
         .tab-btn { background: transparent; border: none; color: #997b5e; padding: 10px 20px; font-family: 'Rye', cursive; font-size: 1.2em; }
         .tab-btn.active { color: var(--gold); border-bottom: 3px solid var(--gold); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+
         .pos-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
         .products-section { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .receipt-section { background-color: rgba(0,0,0,0.6); border: 2px solid #4a3625; padding: 15px; border-radius: 5px; }
         .receipt-section ul { list-style: none; padding: 0; min-height: 250px; border-bottom: 1px dashed #634b35; }
         .receipt-section li { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95em; }
         .total-row { font-size: 1.3em; font-weight: bold; color: var(--gold); display: flex; justify-content: space-between; margin-bottom: 15px; font-family: 'Rye', cursive; }
+        
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .summary-box { background-color: var(--green); border: 1px solid var(--gold); padding: 15px; border-radius: 5px; text-align: center; margin-bottom: 20px; }
         .big-total { font-size: 2.5em; color: var(--gold); font-family: 'Rye', cursive; margin: 0; }
         .stats-panel { background-color: #17120e; border: 1px solid #634b35; padding: 15px; border-radius: 3px; }
+        
         .kitchen-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .recipe-card { background: var(--parchment); color: #241c15; padding: 15px; border-radius: 3px; border: 1px solid #634b35; }
         .recipe-card h3 { color: #5c3a21; border-bottom: 1px solid #5c3a21; margin: 0 0 5px 0; font-family: 'Rye'; font-size: 1.2em; text-shadow: none; }
+
         .history-list { max-height: 300px; overflow-y: auto; }
-        .history-item { background: rgba(255,255,255,0.05); border-left: 4px solid var(--gold); padding: 10px; margin-bottom: 10px; font-size: 0.85em; }
+        .history-item { background: rgba(255,255,255,0.05); border-left: 4px solid var(--gold); padding: 10px; margin-bottom: 10px; font-size: 0.85em; line-height: 1.6; }
         .label { color: var(--gold); font-family: 'Rye', cursive; margin-right: 5px; }
         .session-info { font-size: 0.8em; text-align: center; color: var(--gold); background: rgba(0,0,0,0.3); padding: 8px; margin-bottom: 20px; border: 1px solid #634b35; font-family: 'Rye'; }
         
         @media screen and (max-width: 800px) {
             .pos-grid, .stats-grid, .kitchen-grid { grid-template-columns: 1fr; }
+            .products-section { grid-template-columns: 1fr 1fr; }
         }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #634b35; }
     </style>
 </head>
 <body>
@@ -154,7 +152,7 @@
     <div id="modal-overlay">
         <div class="custom-modal">
             <h2 id="modal-title">Potwierdzenie</h2>
-            <p id="modal-message">Czy na pewno chcesz to zrobić?</p>
+            <p id="modal-message">Czy na pewno?</p>
             <div class="modal-btns">
                 <button class="m-btn m-btn-yes" id="modal-confirm-btn">TAK</button>
                 <button class="m-btn m-btn-no" onclick="closeModal()">NIE</button>
@@ -164,7 +162,7 @@
 
     <div class="pos-container">
         <h1>The Berry Lane Saloon</h1>
-        <div id="session-display" class="session-info">Ładowanie...</div>
+        <div id="session-display" class="session-info">Bieżąca zmiana: Ładowanie...</div>
 
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('pos')">Kasa</button>
@@ -174,8 +172,7 @@
 
         <div id="tab-pos" class="tab-content active">
             <div class="pos-grid">
-                <div class="products-section" id="products">
-                    </div>
+                <div class="products-section" id="products"></div>
                 <div class="receipt-section">
                     <h3 style="text-align:center; font-family:Rye; color:var(--gold);">Rachunek</h3>
                     <ul id="receipt-items"></ul>
@@ -187,15 +184,15 @@
         </div>
 
         <div id="tab-ledger" class="tab-content">
-            <div class="summary-box"><h2>Utarg (Brutto)</h2><p class="big-total" id="total-revenue">$0.00</p></div>
+            <div class="summary-box"><h2>Skumulowany Utarg (Brutto)</h2><p class="big-total" id="total-revenue">$0.00</p></div>
             <div class="stats-grid">
                 <div class="stats-panel">
                     <h3>Statystyki Towarów</h3>
                     <ul id="items-sold-list" style="list-style:none; padding:0;"></ul>
                     <div style="border-top:2px solid var(--gold); margin-top:10px; padding-top:10px;">
-                        <div style="display:flex; justify-content:space-between;"><span>SUMA:</span><span id="list-total-sum">$0.00</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span>SUMA BRUTTO:</span><span id="list-total-sum">$0.00</span></div>
                         <div style="display:flex; justify-content:space-between; color:#ff9999;"><span>Podatek 10%:</span><span id="tax-amount">-$0.00</span></div>
-                        <div style="display:flex; justify-content:space-between; color:#aaffaa;"><span>ZYSK NETTO:</span><span id="net-profit">$0.00</span></div>
+                        <div style="display:flex; justify-content:space-between; color:#aaffaa; font-weight:bold;"><span>ZYSK NETTO:</span><span id="net-profit">$0.00</span></div>
                     </div>
                 </div>
                 <div class="stats-panel">
@@ -208,8 +205,7 @@
         </div>
 
         <div id="tab-kitchen" class="tab-content">
-            <div class="kitchen-grid" id="kitchen-recipes">
-                </div>
+            <div class="kitchen-grid" id="kitchen-recipes"></div>
         </div>
     </div>
 
@@ -218,19 +214,17 @@
         import { getFirestore, collection, onSnapshot, query, orderBy, setDoc, doc, getDoc, updateDoc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyCi-Tjj5gTUzNvCtxi1gFZKRTrIqbOrE8I",
-            authDomain: "the-berry-lane-saloon.firebaseapp.com",
-            projectId: "the-berry-lane-saloon",
-            storageBucket: "the-berry-lane-saloon.firebasestorage.app",
-            messagingSenderId: "696171119297",
-            appId: "1:696171119297:web:4959d0a45349dde66a4a40",
-            measurementId: "G-SF2E2EX7JR"
+            apiKey: "TWÓJ_API_KEY",
+            authDomain: "TWOJ_PROJEKT.firebaseapp.com",
+            projectId: "TWOJ_PROJEKT",
+            storageBucket: "TWOJ_PROJEKT.appspot.com",
+            messagingSenderId: "TWOJ_SENDER_ID",
+            appId: "TWOJE_APP_ID"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- MENU I PRZEPISY ---
         const menuData = [
             { n: 'Whisky', p: 4, r: '2x Kukurydza, 1x Woda' },
             { n: 'Piwo', p: 3, r: '2x Pszenica, 1x Woda' },
@@ -245,7 +239,6 @@
             { n: 'Placek wołowy', p: 8, r: '2x Wołowina, 2x Pszenica, 2x Jajko' }
         ];
 
-        // --- GENEROWANIE UI ---
         const prodDiv = document.getElementById('products');
         const kitDiv = document.getElementById('kitchen-recipes');
         menuData.forEach(m => {
@@ -253,20 +246,14 @@
             kitDiv.innerHTML += `<div class="recipe-card"><h3>${m.n}</h3><ul><li>${m.r}</li></ul></div>`;
         });
 
-        // --- LOGIKA MODALA ---
         window.openModal = (title, msg, onConfirm) => {
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-message').innerText = msg;
             document.getElementById('modal-overlay').style.display = 'flex';
-            document.getElementById('modal-confirm-btn').onclick = () => {
-                onConfirm();
-                closeModal();
-            };
+            document.getElementById('modal-confirm-btn').onclick = () => { onConfirm(); closeModal(); };
         };
-
         window.closeModal = () => { document.getElementById('modal-overlay').style.display = 'none'; };
 
-        // --- LOGIKA POS ---
         let activeSessionName = "Zmiana_1";
         let statsStartTime = null;
 
@@ -281,7 +268,7 @@
                 await setDoc(doc(db, "pos_metadata", "current_session"), { sessionNumber: 1, globalStatsResetTime: serverTimestamp() });
                 activeSessionName = "Zmiana_nr_1";
             }
-            document.getElementById('session-display').innerText = "BIEŻĄCA: " + activeSessionName;
+            document.getElementById('session-display').innerText = "BIEŻĄCA ZMIANA: " + activeSessionName;
             document.getElementById('session-name-title').innerText = activeSessionName;
             startListen();
         }
@@ -331,16 +318,15 @@
             } catch(e) { console.error(e); }
         };
 
-        // ZMIENIONE: Użycie nowego Modala zamiast confirm()
         window.archiveCurrentSession = () => {
-            openModal("Zakończ Zmianę", `Czy chcesz zakończyć ${activeSessionName} i rozpocząć nową?`, async () => {
+            openModal("Zakończ Zmianę", `Rozpocząć nową sesję po ${activeSessionName}?`, async () => {
                 await updateDoc(doc(db, "pos_metadata", "current_session"), { sessionNumber: increment(1) });
                 location.reload();
             });
         };
 
         window.globalStatsReset = () => {
-            openModal("Wielki Reset", "Wyzerować globalne statystyki (podatek i towary)?", async () => {
+            openModal("Wielki Reset", "Wyzerować wszystkie statystyki (podatek i towary)?", async () => {
                 await updateDoc(doc(db, "pos_metadata", "current_session"), { globalStatsResetTime: serverTimestamp() });
                 location.reload();
             });
@@ -353,18 +339,29 @@
                     const d = doc.data();
                     if(!d.createdAt) return;
                     const date = d.createdAt.toDate();
-                    if(date >= statsStartTime){
+                    if (date >= statsStartTime) {
                         gRev += d.totalPrice;
                         d.items.forEach(i => {
-                            if(!iStats[i.name]) iStats[i.name] = {q: 0, r: 0};
+                            if (!iStats[i.name]) iStats[i.name] = {q: 0, r: 0};
                             iStats[i.name].q += i.quantity;
                             iStats[i.name].r += (i.price * i.quantity);
                         });
                     }
-                    if(d.sessionName === activeSessionName){
-                        let itemsHtml = '<ul>';
-                        d.items.forEach(i => itemsHtml += `<li>${i.quantity}x ${i.name}</li>`);
-                        hist += `<div class="history-item"><span class="label">Kto:</span> Clara Lane<br><span class="label">Data:</span> ${date.toLocaleTimeString()}<br>${itemsHtml}</ul><span class="label">Suma:</span> $${d.totalPrice.toFixed(2)}</div>`;
+                    if (d.sessionName === activeSessionName) {
+                        let itemsList = '<ul>';
+                        d.items.forEach(i => itemsList += `<li>${i.quantity}x ${i.name}</li>`);
+                        itemsList += '</ul>';
+
+                        // --- PRZYWRÓCONY TWÓJ WZÓR ---
+                        hist += `
+                        <div class="history-item">
+                            <span class="label">Saloon:</span> The Berry Lane Saloon<br>
+                            <span class="label">Kto:</span> ${d.customer}<br>
+                            <span class="label">Data:</span> ${date.toLocaleString()}<br>
+                            <span class="label">Rodzaj potrawy/trunku:</span>
+                            ${itemsList}
+                            <span class="label">Cena:</span> $${d.totalPrice.toFixed(2)}
+                        </div>`;
                     }
                 });
                 const tax = gRev * 0.1;
