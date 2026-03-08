@@ -57,7 +57,7 @@
         .m-btn { padding: 12px 25px; font-family: 'Rye'; border: 2px solid #000; border-radius: 4px; cursor: pointer; }
 
         /* --- ANIMOWANE PRZYCISKI --- */
-        button { cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); outline: none; border-radius: 4px; }
+        button { cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); outline: none; border-radius: 4px; border: none; }
         button:active { transform: translateY(3px) scale(0.98) !important; }
 
         .product-btn { background-color: #4a3625; border: 1px solid #634b35; color: #e3d5b8; padding: 15px; text-align: left; }
@@ -122,8 +122,8 @@
             <h2 id="modal-title">Potwierdzenie</h2>
             <p id="modal-message">Czy na pewno?</p>
             <div class="modal-btns">
-                <button class="m-btn m-btn-yes" id="modal-confirm-btn">TAK</button>
-                <button class="m-btn m-btn-no" onclick="closeModal()">NIE</button>
+                <button class="m-btn m-btn-yes" id="modal-confirm-btn" style="background:var(--green); color:white">TAK</button>
+                <button class="m-btn m-btn-no" onclick="closeModal()" style="background:#444; color:#ccc">NIE</button>
             </div>
         </div>
     </div>
@@ -202,12 +202,12 @@
 
         const firebaseConfig = {
             apiKey: "AIzaSyCi-Tjj5gTUzNvCtxi1gFZKRTrIqbOrE8I",
-  authDomain: "the-berry-lane-saloon.firebaseapp.com",
-  projectId: "the-berry-lane-saloon",
-  storageBucket: "the-berry-lane-saloon.firebasestorage.app",
-  messagingSenderId: "696171119297",
-  appId: "1:696171119297:web:4959d0a45349dde66a4a40",
-  measurementId: "G-SF2E2EX7JR"
+            authDomain: "the-berry-lane-saloon.firebaseapp.com",
+            projectId: "the-berry-lane-saloon",
+            storageBucket: "the-berry-lane-saloon.firebasestorage.app",
+            messagingSenderId: "696171119297",
+            appId: "1:696171119297:web:4959d0a45349dde66a4a40",
+            measurementId: "G-SF2E2EX7JR"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -314,7 +314,6 @@
                     allTimeRev += d.totalPrice;
                     totalOrders++;
 
-                    // Bestseller: liczymy sztuki z KAŻDEJ transakcji
                     if(d.items) {
                         d.items.forEach(item => {
                             if(!allTimeItemCounts[item.name]) allTimeItemCounts[item.name] = 0;
@@ -322,7 +321,6 @@
                         });
                     }
 
-                    // Statystyki okresowe (do resetu)
                     if (date >= statsStartTime) {
                         currentRev += d.totalPrice;
                         d.items.forEach(i => {
@@ -331,37 +329,31 @@
                         });
                     }
 
-                    // Historia bieżącej sesji
                     if (d.sessionName === activeSessionName) {
                         let itemsList = '<ul>'; d.items.forEach(i => itemsList += `<li>${i.quantity}x ${i.name}</li>`); itemsList += '</ul>';
                         hist += `<div class="history-item"><span class="label">Saloon:</span> The Berry Lane Saloon<br><span class="label">Kto:</span> ${d.customer}<br><span class="label">Data:</span> ${date.toLocaleString()}<br><span class="label">Potrawy:</span>${itemsList}<span class="label">Cena:</span> $${d.totalPrice.toFixed(2)}</div>`;
                     }
                 });
 
-                // Znajdź Bestsellera
                 let bestItem = "---"; let maxQty = 0;
                 Object.entries(allTimeItemCounts).forEach(([name, qty]) => {
                     if(qty > maxQty) { maxQty = qty; bestItem = name; }
                 });
 
-                // Wyliczenia
                 const cTax = currentRev * 0.1; 
                 const atTax = allTimeRev * 0.1;
                 const atNet = allTimeRev - atTax;
 
-                // UI Księgi
                 document.getElementById('total-revenue').innerText = `$${currentRev.toFixed(2)}`;
                 document.getElementById('list-total-sum').innerText = `$${currentRev.toFixed(2)}`;
                 document.getElementById('tax-amount').innerText = `-$${cTax.toFixed(2)}`;
                 document.getElementById('net-profit').innerText = `$${(currentRev - cTax).toFixed(2)}`;
                 
-                // UI Skarbca
                 document.getElementById('at-gross').innerText = `$${allTimeRev.toFixed(2)}`;
                 document.getElementById('at-tax').innerText = `-$${atTax.toFixed(2)}`;
                 document.getElementById('at-net').innerText = `$${atNet.toFixed(2)}`;
                 document.getElementById('all-time-net-profit').innerText = `$${atNet.toFixed(2)}`;
                 
-                // Raport operacyjny
                 document.getElementById('best-seller').innerText = bestItem + (maxQty > 0 ? ` (${maxQty} szt.)` : "");
                 document.getElementById('customer-count').innerText = totalOrders;
                 document.getElementById('transaction-history').innerHTML = hist || '<p style="text-align:center; opacity:0.5;">Brak transakcji...</p>';
