@@ -114,6 +114,11 @@
         .label { color: var(--gold); font-family: 'Rye'; margin-right: 5px; }
         .session-info { font-size: 0.8em; text-align: center; color: var(--gold); background: rgba(0,0,0,0.3); padding: 8px; margin-bottom: 20px; border: 1px solid #634b35; font-family: 'Rye'; }
         
+        /* --- KALKULATOR KUCHNIA --- */
+        .calc-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #4a3625; }
+        .calc-input { width: 60px; background: #17120e; color: var(--gold); border: 1px solid #634b35; padding: 8px; text-align: center; font-weight: bold; font-family: 'Roboto'; border-radius: 4px; outline:none; }
+        .calc-input:focus { border-color: var(--gold); }
+
         @media screen and (max-width: 800px) { .pos-grid, .stats-grid, .kitchen-grid { grid-template-columns: 1fr; } .products-section { grid-template-columns: 1fr 1fr; } }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #634b35; }
@@ -230,6 +235,22 @@
         </div>
 
         <div id="tab-kitchen" class="tab-content">
+            <div class="stats-grid" style="margin-bottom: 30px;">
+                <div class="stats-panel">
+                    <h3 style="color:var(--gold); border-bottom:1px solid var(--gold); padding-bottom:10px; margin-top:0;">Kalkulator Zamówień</h3>
+                    <div id="calc-inputs" style="max-height: 250px; overflow-y: auto; padding-right:10px;">
+                        </div>
+                </div>
+                <div class="stats-panel">
+                    <h3 style="color:var(--gold); border-bottom:1px solid var(--gold); padding-bottom:10px; margin-top:0;">Potrzebne Surowce</h3>
+                    <ul id="calc-results" style="list-style:none; padding:0; margin:0; font-size:1.1em; max-height: 200px; overflow-y: auto;">
+                        <li style="opacity:0.5;">Wybierz coś z listy obok, aby przeliczyć...</li>
+                    </ul>
+                    <button class="clear-btn" onclick="clearCalculator()" style="margin-top:15px;">WYCZYŚĆ KALKULATOR</button>
+                </div>
+            </div>
+
+            <h3 style="color:var(--gold); text-align:center; margin-bottom:15px; font-family:'Rye'; border-bottom:2px solid #634b35; padding-bottom:10px;">Książka Kucharska</h3>
             <div class="kitchen-grid" id="kitchen-recipes"></div>
         </div>
     </div>
@@ -266,9 +287,55 @@
         ];
 
         menuData.forEach(m => {
+            // Dodawanie Kasy
             document.getElementById('products').innerHTML += `<button class="product-btn" onclick="addToReceipt('${m.n}', ${m.p})"><strong>${m.n}</strong><span>$${m.p}.00</span></button>`;
+            
+            // Dodawanie Książki Kucharskiej
             document.getElementById('kitchen-recipes').innerHTML += `<div class="recipe-card"><h3>${m.n}</h3><ul><li>${m.r}</li></ul></div>`;
+            
+            // Dodawanie do Kalkulatora
+            document.getElementById('calc-inputs').innerHTML += `
+                <div class="calc-row">
+                    <span style="color:var(--parchment); font-family:'Rye'; font-size:0.9em;">${m.n}</span>
+                    <input type="number" min="0" value="0" class="calc-input" data-name="${m.n}" oninput="calculateIngredients()">
+                </div>
+            `;
         });
+
+        // --- FUNKCJA KALKULATORA SKŁADNIKÓW ---
+        window.calculateIngredients = () => {
+            let totals = {};
+            document.querySelectorAll('.calc-input').forEach(input => {
+                let qty = parseInt(input.value) || 0;
+                if (qty > 0) {
+                    let prodName = input.dataset.name;
+                    let menuItem = menuData.find(m => m.n === prodName);
+                    if (menuItem) {
+                        let parts = menuItem.r.split(', ');
+                        parts.forEach(p => {
+                            let [ingQtyStr, ingName] = p.split('x ');
+                            let ingQty = parseInt(ingQtyStr) * qty;
+                            totals[ingName] = (totals[ingName] || 0) + ingQty;
+                        });
+                    }
+                }
+            });
+
+            let resHtml = '';
+            for (let ing in totals) {
+                resHtml += `<li style="margin-bottom:10px; border-bottom:1px dashed #4a3625; padding-bottom:5px;">
+                    <span style="color:var(--gold); font-weight:bold; font-size:1.2em; display:inline-block; width:45px;">${totals[ing]}x</span> ${ing}
+                </li>`;
+            }
+            
+            if(resHtml === '') resHtml = '<li style="opacity:0.5;">Wybierz coś z listy obok, aby przeliczyć...</li>';
+            document.getElementById('calc-results').innerHTML = resHtml;
+        };
+
+        window.clearCalculator = () => {
+            document.querySelectorAll('.calc-input').forEach(input => input.value = 0);
+            window.calculateIngredients();
+        };
 
         window.openModal = (title, msg, onConfirm) => {
             document.getElementById('modal-title').innerText = title;
@@ -512,7 +579,6 @@
                 document.getElementById('best-seller').innerText = bestItem + (maxQty > 0 ? ` (${maxQty} szt.)` : "");
                 document.getElementById('customer-count').innerText = totalOrders;
                 
-                // Wstawianie historii do odpowiednich sekcji na ekranie
                 document.getElementById('history-clara').innerHTML = histClara || '<p style="text-align:center; opacity:0.5;">Brak transakcji...</p>';
                 document.getElementById('history-thomas').innerHTML = histThomas || '<p style="text-align:center; opacity:0.5;">Brak transakcji...</p>';
                 
