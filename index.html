@@ -73,6 +73,13 @@
         .archive-btn { background-color: #5c3a21; color: #d4c4a8; border: 2px solid var(--gold); padding: 15px; font-family: 'Rye'; width: 100%; box-shadow: 0 4px 0 #2c1e16; }
         .archive-btn:hover { background-color: #7b4f2d; color: #fff; box-shadow: 0 0 20px rgba(209, 178, 111, 0.4); }
 
+        /* --- WYBÓR PRACOWNIKA --- */
+        .employee-select {
+            width: 100%; padding: 10px; margin-bottom: 10px; background-color: var(--wood-dark);
+            color: var(--gold); border: 1px solid #634b35; font-family: 'Rye'; font-size: 1.1em;
+            border-radius: 4px; outline: none; text-align: center; cursor: pointer;
+        }
+
         /* --- TABS --- */
         .tabs { display: flex; justify-content: center; flex-wrap: wrap; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #634b35; }
         .tab-btn { background: transparent; border: none; color: #997b5e; padding: 10px 15px; font-family: 'Rye'; font-size: 1.1em; transition: 0.3s; }
@@ -102,7 +109,7 @@
         .recipe-card { background: var(--parchment); color: #241c15; padding: 15px; border-radius: 3px; border: 1px solid #634b35; }
         .recipe-card h3 { color: #5c3a21; border-bottom: 1px solid #5c3a21; margin: 0 0 5px 0; font-family: 'Rye'; }
 
-        .history-list { max-height: 300px; overflow-y: auto; }
+        .history-list { overflow-y: auto; }
         .history-item { background: rgba(255,255,255,0.05); border-left: 4px solid var(--gold); padding: 10px; margin-bottom: 10px; font-size: 0.85em; line-height: 1.6; }
         .label { color: var(--gold); font-family: 'Rye'; margin-right: 5px; }
         .session-info { font-size: 0.8em; text-align: center; color: var(--gold); background: rgba(0,0,0,0.3); padding: 8px; margin-bottom: 20px; border: 1px solid #634b35; font-family: 'Rye'; }
@@ -141,7 +148,13 @@
             <div class="pos-grid">
                 <div class="products-section" id="products"></div>
                 <div class="receipt-section">
-                    <h3 style="text-align:center; font-family:Rye; color:var(--gold);">Rachunek</h3>
+                    <h3 style="text-align:center; font-family:Rye; color:var(--gold); margin-bottom:10px;">Rachunek</h3>
+                    
+                    <select id="employee-select" class="employee-select">
+                        <option value="Clara Lane">Pracownik: Clara Lane</option>
+                        <option value="Thomas Hale">Pracownik: Thomas Hale</option>
+                    </select>
+
                     <ul id="receipt-items"></ul>
                     <div class="total-row"><span>SUMA:</span><span id="receipt-total">$0.00</span></div>
                     <button class="sell-btn" onclick="completeSale()">ZATWIERDŹ SPRZEDAŻ</button>
@@ -163,9 +176,15 @@
                     </div>
                 </div>
                 <div class="stats-panel">
-                    <h3>Historia: <span id="session-name-title">...</span></h3>
-                    <div class="history-list" id="transaction-history"></div>
-                    <button class="archive-btn" style="margin-top:15px;" onclick="archiveCurrentSession()">NOWA ZMIANA</button>
+                    <h3>Historia Zmiany: <span id="session-name-title">...</span></h3>
+                    
+                    <h4 style="color:var(--gold); border-bottom: 1px dashed #634b35; padding-bottom: 5px; margin: 15px 0 10px 0;">Odpisy Clary Lane</h4>
+                    <div class="history-list" id="history-clara" style="max-height: 180px;"></div>
+                    
+                    <h4 style="color:var(--gold); border-bottom: 1px dashed #634b35; padding-bottom: 5px; margin: 20px 0 10px 0;">Odpisy Thomasa Hale</h4>
+                    <div class="history-list" id="history-thomas" style="max-height: 180px;"></div>
+
+                    <button class="archive-btn" style="margin-top:20px;" onclick="archiveCurrentSession()">ZAKOŃCZ ZMIANĘ</button>
                 </div>
             </div>
         </div>
@@ -205,7 +224,7 @@
                 <div class="stats-panel">
                     <h3 style="color:var(--gold); border-bottom:1px solid var(--gold); padding-bottom:10px;">Archiwum Podatkowe</h3>
                     <div class="history-list" id="tax-archive-list" style="max-height:220px; overflow-y:auto; margin-top:10px;">
-                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -313,9 +332,18 @@
         window.completeSale = async () => {
             if(!currentReceipt.length) return;
             const toSave = [...currentReceipt], total = currentTotal; clearReceipt();
+            
+            const selectedEmployee = document.getElementById('employee-select').value;
+            
             try {
                 const now = new Date(); const id = activeSessionName + "_" + now.getHours() + "-" + now.getMinutes() + "-" + now.getSeconds();
-                await setDoc(doc(db, "berry_lane_pos", id), { customer: "Clara Lane", items: toSave, totalPrice: total, sessionName: activeSessionName, createdAt: serverTimestamp() });
+                await setDoc(doc(db, "berry_lane_pos", id), { 
+                    customer: selectedEmployee, 
+                    items: toSave, 
+                    totalPrice: total, 
+                    sessionName: activeSessionName, 
+                    createdAt: serverTimestamp() 
+                });
             } catch(e) { console.error(e); }
         };
 
@@ -413,7 +441,8 @@
 
         function startListen() {
             onSnapshot(query(collection(db, "berry_lane_pos"), orderBy("createdAt", "desc")), (s) => {
-                let currentRev = 0, allTimeRev = 0, iStats = {}, allTimeItemCounts = {}, hist = '', totalOrders = 0;
+                let currentRev = 0, allTimeRev = 0, iStats = {}, allTimeItemCounts = {}, totalOrders = 0;
+                let histClara = '', histThomas = '';
                 
                 s.forEach(doc => {
                     const d = doc.data(); if(!d.createdAt) return;
@@ -438,8 +467,21 @@
                     }
 
                     if (d.sessionName === activeSessionName) {
-                        let itemsList = '<ul>'; d.items.forEach(i => itemsList += `<li>${i.quantity}x ${i.name}</li>`); itemsList += '</ul>';
-                        hist += `<div class="history-item"><span class="label">Saloon:</span> The Berry Lane Saloon<br><span class="label">Kto:</span> ${d.customer}<br><span class="label">Data:</span> ${date.toLocaleString()}<br><span class="label">Potrawy:</span>${itemsList}<span class="label">Cena:</span> $${d.totalPrice.toFixed(2)}</div>`;
+                        let itemsList = '<ul style="margin:5px 0; padding-left:20px;">'; 
+                        d.items.forEach(i => itemsList += `<li><span style="color:var(--gold); font-weight:bold;">${i.quantity}x</span> ${i.name}</li>`); 
+                        itemsList += '</ul>';
+                        
+                        let hItem = `<div class="history-item">
+                            <span class="label">Data:</span> ${date.toLocaleString()}<br>
+                            <span class="label">Wydano:</span>${itemsList}
+                            <span class="label">Suma:</span> <span style="color:#aaffaa; font-weight:bold; font-size:1.1em;">$${d.totalPrice.toFixed(2)}</span>
+                        </div>`;
+
+                        if (d.customer === "Thomas Hale") {
+                            histThomas += hItem;
+                        } else {
+                            histClara += hItem;
+                        }
                     }
                 });
 
@@ -469,7 +511,11 @@
 
                 document.getElementById('best-seller').innerText = bestItem + (maxQty > 0 ? ` (${maxQty} szt.)` : "");
                 document.getElementById('customer-count').innerText = totalOrders;
-                document.getElementById('transaction-history').innerHTML = hist || '<p style="text-align:center; opacity:0.5;">Brak transakcji...</p>';
+                
+                // Wstawianie historii do odpowiednich sekcji na ekranie
+                document.getElementById('history-clara').innerHTML = histClara || '<p style="text-align:center; opacity:0.5;">Brak transakcji...</p>';
+                document.getElementById('history-thomas').innerHTML = histThomas || '<p style="text-align:center; opacity:0.5;">Brak transakcji...</p>';
+                
                 document.getElementById('items-sold-list').innerHTML = Object.entries(iStats).sort((a,b)=>b[1].r - a[1].r).map(([n,d])=>`<li><span>${n} (<span style="color:var(--gold);">${d.q}</span>)</span><span style="color:#fff;">$${d.r.toFixed(2)}</span></li>`).join('');
             });
         }
