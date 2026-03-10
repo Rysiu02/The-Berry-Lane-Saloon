@@ -119,6 +119,12 @@
         .calc-input { width: 60px; background: #17120e; color: var(--gold); border: 1px solid #634b35; padding: 8px; text-align: center; font-weight: bold; font-family: 'Roboto'; border-radius: 4px; outline:none; }
         .calc-input:focus { border-color: var(--gold); }
 
+        /* DODATEK PROMO */
+        .promo-btn { 
+            background: none; border: 1px solid var(--gold); color: var(--gold); 
+            padding: 2px 5px; font-size: 0.7em; cursor: pointer; border-radius: 3px;
+        }
+
         @media screen and (max-width: 800px) { .pos-grid, .stats-grid, .kitchen-grid { grid-template-columns: 1fr; } .products-section { grid-template-columns: 1fr 1fr; } }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #634b35; }
@@ -136,6 +142,17 @@
             </div>
         </div>
     </div>
+    <div id="promo-modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 1001; justify-content: center; align-items: center;">
+    <div class="custom-modal">
+        <h2 id="promo-modal-title" style="color:var(--gold); font-family:'Rye';">Promocja</h2>
+        <p id="promo-modal-subtitle">Wpisz nową cenę ($) lub procent (%)</p>
+        <input type="text" id="promo-input" class="calc-input" style="width: 80%; font-size: 1.5em; margin: 15px 0;" placeholder="np. 5 lub 20%">
+        <div class="modal-btns">
+            <button class="m-btn" id="promo-confirm-btn" style="background:var(--green); color:white">ZASTOSUJ</button>
+            <button class="m-btn" onclick="closePromoModal()" style="background:#444; color:#ccc">ANULUJ</button>
+        </div>
+    </div>
+</div>
 
     <div class="pos-container">
         <h1>The Berry Lane Saloon</h1>
@@ -179,15 +196,25 @@
                         <div style="display:flex; justify-content:space-between; color:#ff9999;"><span>Podatek 10%:</span><span id="tax-amount">-$0.00</span></div>
                         <div style="display:flex; justify-content:space-between; color:#aaffaa; font-weight:bold;"><span>ZYSK NETTO:</span><span id="net-profit">$0.00</span></div>
                     </div>
+                    <h3 style="color:var(--gold); border-bottom:1px solid var(--gold); margin-top:30px; padding-bottom:10px;">Archiwum Rozliczeń</h3>
+                    <div id="payout-history-list" class="history-list" style="max-height: 200px;"></div>
                 </div>
                 <div class="stats-panel">
                     <h3>Historia Zmiany: <span id="session-name-title">...</span></h3>
                     
-                    <h4 style="color:var(--gold); border-bottom: 1px dashed #634b35; padding-bottom: 5px; margin: 15px 0 10px 0;">Odpisy Clary Lane</h4>
-                    <div class="history-list" id="history-clara" style="max-height: 180px;"></div>
+                    <h4 style="color:var(--gold); border-bottom: 1px dashed #634b35; padding-bottom: 5px; margin: 15px 0 10px 0; display:flex; justify-content:space-between;">
+                        <span>Odpisy Clary Lane</span>
+                        <span id="payout-clara" style="color:#aaffaa">$0.00</span>
+                    </h4>
+                    <div class="history-list" id="history-clara" style="max-height: 150px;"></div>
+                    <button class="sell-btn" style="font-size:0.8em; padding:8px; margin-bottom:15px;" onclick="settleEmployee('Clara Lane')">ROZLICZ CLARĘ (100%)</button>
                     
-                    <h4 style="color:var(--gold); border-bottom: 1px dashed #634b35; padding-bottom: 5px; margin: 20px 0 10px 0;">Odpisy Thomasa Hale</h4>
-                    <div class="history-list" id="history-thomas" style="max-height: 180px;"></div>
+                    <h4 style="color:var(--gold); border-bottom: 1px dashed #634b35; padding-bottom: 5px; margin: 20px 0 10px 0; display:flex; justify-content:space-between;">
+                        <span>Odpisy Thomasa Hale</span>
+                        <span id="payout-thomas" style="color:#aaffaa">$0.00</span>
+                    </h4>
+                    <div class="history-list" id="history-thomas" style="max-height: 150px;"></div>
+                    <button class="sell-btn" style="font-size:0.8em; padding:8px;" onclick="settleEmployee('Thomas Hale')">ROZLICZ THOMASA (15%)</button>
 
                     <button class="archive-btn" style="margin-top:20px;" onclick="archiveCurrentSession()">ZAKOŃCZ ZMIANĘ</button>
                 </div>
@@ -257,7 +284,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, query, orderBy, setDoc, doc, getDoc, updateDoc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, query, orderBy, setDoc, doc, getDoc, updateDoc, increment, serverTimestamp, addDoc, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCi-Tjj5gTUzNvCtxi1gFZKRTrIqbOrE8I",
@@ -287,13 +314,8 @@
         ];
 
         menuData.forEach(m => {
-            // Dodawanie Kasy
             document.getElementById('products').innerHTML += `<button class="product-btn" onclick="addToReceipt('${m.n}', ${m.p})"><strong>${m.n}</strong><span>$${m.p}.00</span></button>`;
-            
-            // Dodawanie Książki Kucharskiej
             document.getElementById('kitchen-recipes').innerHTML += `<div class="recipe-card"><h3>${m.n}</h3><ul><li>${m.r}</li></ul></div>`;
-            
-            // Dodawanie do Kalkulatora
             document.getElementById('calc-inputs').innerHTML += `
                 <div class="calc-row">
                     <span style="color:var(--parchment); font-family:'Rye'; font-size:0.9em;">${m.n}</span>
@@ -302,7 +324,6 @@
             `;
         });
 
-        // --- FUNKCJA KALKULATORA SKŁADNIKÓW ---
         window.calculateIngredients = () => {
             let totals = {};
             document.querySelectorAll('.calc-input').forEach(input => {
@@ -320,14 +341,10 @@
                     }
                 }
             });
-
             let resHtml = '';
             for (let ing in totals) {
-                resHtml += `<li style="margin-bottom:10px; border-bottom:1px dashed #4a3625; padding-bottom:5px;">
-                    <span style="color:var(--gold); font-weight:bold; font-size:1.2em; display:inline-block; width:45px;">${totals[ing]}x</span> ${ing}
-                </li>`;
+                resHtml += `<li style="margin-bottom:10px; border-bottom:1px dashed #4a3625; padding-bottom:5px;"><span style="color:var(--gold); font-weight:bold; font-size:1.2em; display:inline-block; width:45px;">${totals[ing]}x</span> ${ing}</li>`;
             }
-            
             if(resHtml === '') resHtml = '<li style="opacity:0.5;">Wybierz coś z listy obok, aby przeliczyć...</li>';
             document.getElementById('calc-results').innerHTML = resHtml;
         };
@@ -365,14 +382,12 @@
 
             const taxSnap = await getDoc(doc(db, "pos_metadata", "tax_info"));
             if(!taxSnap.exists()){
-                await setDoc(doc(db, "pos_metadata", "tax_info"), {
-                    nextDate: "2026-03-21",
-                    archive: []
-                });
+                await setDoc(doc(db, "pos_metadata", "tax_info"), { nextDate: "2026-03-21", archive: [] });
             }
 
             startListen();
             listenToTaxes();
+            listenToPayouts();
         }
         init();
 
@@ -386,33 +401,96 @@
         window.addToReceipt = (name, price) => {
             const item = currentReceipt.find(i => i.name === name);
             if(item) item.quantity++; else currentReceipt.push({name, price, quantity: 1});
-            currentTotal += price; updateUI();
+            updateUI();
         };
         window.clearReceipt = () => { currentReceipt = []; currentTotal = 0; updateUI(); };
 
+        // PROMOCJA
+        // Otwieranie modala promocji
+window.applyPromo = (index) => {
+    const item = currentReceipt[index];
+    const modal = document.getElementById('promo-modal-overlay');
+    const input = document.getElementById('promo-input');
+    
+    document.getElementById('promo-modal-title').innerText = "Promocja: " + item.name;
+    input.value = ""; // czyścimy pole
+    modal.style.display = 'flex';
+    input.focus();
+
+    // Obsługa zatwierdzenia
+    document.getElementById('promo-confirm-btn').onclick = () => {
+        const val = input.value;
+        if (val === null || val === "") {
+            delete item.promoPrice;
+        } else if (val.includes('%')) {
+            const percent = parseFloat(val.replace('%', ''));
+            if (!isNaN(percent)) item.promoPrice = item.price * (1 - (percent / 100));
+        } else {
+            const newPrice = parseFloat(val.replace(',', '.')); // zamiana przecinka na kropkę dla bezpieczeństwa
+            if (!isNaN(newPrice)) item.promoPrice = newPrice;
+        }
+        closePromoModal();
+        updateUI();
+    };
+};
+
+// Zamykanie modala promocji
+window.closePromoModal = () => {
+    document.getElementById('promo-modal-overlay').style.display = 'none';
+};
+
         function updateUI() {
             const l = document.getElementById('receipt-items'); l.innerHTML = '';
-            currentReceipt.forEach(i => { l.innerHTML += `<li><span><span style="color:var(--gold); font-weight:bold;">${i.quantity}x</span> ${i.name}</span><span>$${(i.price*i.quantity).toFixed(2)}</span></li>`; });
+            currentTotal = 0;
+            currentReceipt.forEach((i, index) => {
+                const finalP = i.promoPrice || i.price;
+                currentTotal += (finalP * i.quantity);
+                const pText = i.promoPrice ? `<span style="text-decoration:line-through; font-size:0.8em; opacity:0.6;">$${i.price}</span> $${finalP.toFixed(2)}` : `$${i.price.toFixed(2)}`;
+                l.innerHTML += `<li style="display:flex; justify-content:space-between; align-items:center;">
+                    <span><span style="color:var(--gold); font-weight:bold;">${i.quantity}x</span> ${i.name} <button class="promo-btn" onclick="applyPromo(${index})">PROMO</button></span>
+                    <span>${pText}</span></li>`;
+            });
             document.getElementById('receipt-total').innerText = `$${currentTotal.toFixed(2)}`;
         }
 
         window.completeSale = async () => {
             if(!currentReceipt.length) return;
-            const toSave = [...currentReceipt], total = currentTotal; clearReceipt();
-            
+            const toSave = currentReceipt.map(i => ({...i, finalPrice: i.promoPrice || i.price}));
+            const total = currentTotal; clearReceipt();
             const selectedEmployee = document.getElementById('employee-select').value;
-            
             try {
-                const now = new Date(); const id = activeSessionName + "_" + now.getHours() + "-" + now.getMinutes() + "-" + now.getSeconds();
+                const now = new Date(); const id = activeSessionName + "_" + now.getTime();
                 await setDoc(doc(db, "berry_lane_pos", id), { 
-                    customer: selectedEmployee, 
-                    items: toSave, 
-                    totalPrice: total, 
-                    sessionName: activeSessionName, 
-                    createdAt: serverTimestamp() 
+                    customer: selectedEmployee, items: toSave, totalPrice: total, 
+                    sessionName: activeSessionName, createdAt: serverTimestamp() 
                 });
             } catch(e) { console.error(e); }
         };
+
+        // ROZLICZENIE PRACOWNIKA
+        window.settleEmployee = async (name) => {
+            const amountId = (name === 'Clara Lane') ? 'payout-clara' : 'payout-thomas';
+            const amountVal = parseFloat(document.getElementById(amountId).innerText.replace('$', ''));
+            if (amountVal <= 0) return alert("Brak kwoty do wypłaty!");
+            openModal("Rozliczenie", `Czy wypłacono $${amountVal.toFixed(2)} dla ${name}?`, async () => {
+                try {
+                    await addDoc(collection(db, "berry_lane_payouts"), {
+                        employee: name, amount: amountVal, session: activeSessionName,
+                        date: new Date().toLocaleString('pl-PL'), createdAt: serverTimestamp()
+                    });
+                } catch (e) { console.error(e); }
+            });
+        };
+
+        function listenToPayouts() {
+            onSnapshot(query(collection(db, "berry_lane_payouts"), orderBy("createdAt", "desc"), limit(10)), (s) => {
+                const list = document.getElementById('payout-history-list');
+                list.innerHTML = s.docs.map(doc => {
+                    const p = doc.data();
+                    return `<div class="history-item"><span class="label">${p.date}</span><br><b>${p.employee}</b>: <span style="color:#aaffaa">$${p.amount.toFixed(2)}</span></div>`;
+                }).join('') || '<p style="text-align:center; opacity:0.5;">Brak historii wypłat...</p>';
+            });
+        }
 
         window.archiveCurrentSession = () => {
             openModal("Zakończ Zmianę", `Rozpocząć nową sesję po ${activeSessionName}?`, async () => {
@@ -429,29 +507,15 @@
                     if (snap.exists()) {
                         const data = snap.data();
                         const oldDateStr = data.nextDate || "2026-03-21";
-                        
                         const parts = oldDateStr.split('-');
                         const oldDateObj = new Date(parts[0], parts[1] - 1, parts[2]);
                         oldDateObj.setDate(oldDateObj.getDate() + 14);
-                        
                         const yyyy = oldDateObj.getFullYear();
                         const mm = String(oldDateObj.getMonth() + 1).padStart(2, '0');
                         const dd = String(oldDateObj.getDate()).padStart(2, '0');
-                        const newDateStr = `${yyyy}-${mm}-${dd}`;
-
-                        const newArchiveItem = {
-                            date: oldDateStr,
-                            amount: currentTaxDue || 0,
-                            paidAt: new Date().toISOString()
-                        };
-
-                        await updateDoc(taxRef, {
-                            nextDate: newDateStr,
-                            archive: [...(data.archive || []), newArchiveItem]
-                        });
-                        
+                        const newArchiveItem = { date: oldDateStr, amount: currentTaxDue || 0, paidAt: new Date().toISOString() };
+                        await updateDoc(taxRef, { nextDate: `${yyyy}-${mm}-${dd}`, archive: [...(data.archive || []), newArchiveItem] });
                         await updateDoc(doc(db, "pos_metadata", "current_session"), { globalStatsResetTime: serverTimestamp() });
-                        
                         location.reload();
                     }
                 } catch(e) { console.error(e); }
@@ -463,44 +527,18 @@
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     const nextDateStr = data.nextDate || "2026-03-21";
-                    
                     const parts = nextDateStr.split('-');
                     const nextDateObj = new Date(parts[0], parts[1] - 1, parts[2]);
-                    
-                    const today = new Date();
-                    today.setHours(0,0,0,0);
-
-                    const diffTime = nextDateObj - today;
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
+                    const today = new Date(); today.setHours(0,0,0,0);
+                    const diffDays = Math.ceil((nextDateObj - today) / (1000 * 60 * 60 * 24));
                     document.getElementById('tax-exact-date').innerText = nextDateObj.toLocaleDateString('pl-PL');
-                    
-                    let daysText = diffDays + " dni";
-                    if (diffDays === 1) daysText = "1 dzień";
-                    else if (diffDays === 0) daysText = "DZISIAJ!";
-                    else if (diffDays < 0) daysText = "SPÓŹNIONY O " + Math.abs(diffDays) + " DNI!";
-                    
-                    document.getElementById('tax-days-left').innerText = daysText;
-                    
-                    if(diffDays <= 3 && diffDays > 0) {
-                        document.getElementById('tax-days-left').style.color = "#ff9999";
-                    } else if (diffDays <= 0) {
-                        document.getElementById('tax-days-left').style.color = "var(--red-bright)";
-                    } else {
-                        document.getElementById('tax-days-left').style.color = "var(--gold)";
-                    }
-
+                    document.getElementById('tax-days-left').innerText = diffDays + " dni";
                     let arcHtml = '';
                     if (data.archive && data.archive.length > 0) {
-                        const sortedArc = [...data.archive].reverse();
-                        sortedArc.forEach(item => {
-                            const dParts = item.date.split('-');
-                            const histDate = new Date(dParts[0], dParts[1] - 1, dParts[2]).toLocaleDateString('pl-PL');
-                            arcHtml += `<div class="history-item"><span class="label">Termin za:</span> ${histDate}<br><span class="label">Zapłacono:</span> <span style="color:#aaffaa">$${item.amount.toFixed(2)}</span></div>`;
+                        [...data.archive].reverse().forEach(item => {
+                            arcHtml += `<div class="history-item"><span class="label">Termin za:</span> ${item.date}<br><span class="label">Zapłacono:</span> <span style="color:#aaffaa">$${item.amount.toFixed(2)}</span></div>`;
                         });
-                    } else {
-                        arcHtml = '<p style="opacity:0.5; text-align:center;">Brak wpisów w archiwum...</p>';
-                    }
+                    } else arcHtml = '<p style="opacity:0.5; text-align:center;">Brak wpisów...</p>';
                     document.getElementById('tax-archive-list').innerHTML = arcHtml;
                 }
             });
@@ -509,80 +547,63 @@
         function startListen() {
             onSnapshot(query(collection(db, "berry_lane_pos"), orderBy("createdAt", "desc")), (s) => {
                 let currentRev = 0, allTimeRev = 0, iStats = {}, allTimeItemCounts = {}, totalOrders = 0;
-                let histClara = '', histThomas = '';
-                
+                let histClara = '', histThomas = '', grossClara = 0, grossThomas = 0;
                 s.forEach(doc => {
                     const d = doc.data(); if(!d.createdAt) return;
                     const date = d.createdAt.toDate();
-                    
-                    allTimeRev += d.totalPrice;
-                    totalOrders++;
-
-                    if(d.items) {
-                        d.items.forEach(item => {
-                            if(!allTimeItemCounts[item.name]) allTimeItemCounts[item.name] = 0;
-                            allTimeItemCounts[item.name] += item.quantity;
-                        });
-                    }
-
+                    allTimeRev += d.totalPrice; totalOrders++;
+                    if(d.items) d.items.forEach(item => {
+                        if(!allTimeItemCounts[item.name]) allTimeItemCounts[item.name] = 0;
+                        allTimeItemCounts[item.name] += item.quantity;
+                    });
                     if (date >= statsStartTime) {
                         currentRev += d.totalPrice;
                         d.items.forEach(i => {
                             if (!iStats[i.name]) iStats[i.name] = {q: 0, r: 0};
-                            iStats[i.name].q += i.quantity; iStats[i.name].r += (i.price * i.quantity);
+                            iStats[i.name].q += i.quantity; iStats[i.name].r += ((i.finalPrice || i.price) * i.quantity);
                         });
                     }
-
                     if (d.sessionName === activeSessionName) {
-                        let itemsList = '<ul style="margin:5px 0; padding-left:20px;">'; 
-                        d.items.forEach(i => itemsList += `<li><span style="color:var(--gold); font-weight:bold;">${i.quantity}x</span> ${i.name}</li>`); 
+                        // TWOJA STRUKTURA: SALON: KTO: DATA: WYDANO: SUMA:
+                        let itemsList = '<ul style="margin:5px 0; padding-left:20px;">';
+                        d.items.forEach(i => {
+                            itemsList += `<li><span style="color:var(--gold); font-weight:bold;">${i.quantity}x</span> ${i.name}</li>`;
+                        });
                         itemsList += '</ul>';
-                        
+
                         let hItem = `<div class="history-item">
+                            <span class="label">Salon:</span> The Berry Lane Saloon<br>
+                            <span class="label">Kto:</span> ${d.customer}<br>
                             <span class="label">Data:</span> ${date.toLocaleString()}<br>
-                            <span class="label">Wydano:</span>${itemsList}
+                            <span class="label">Wydano:</span> ${itemsList}
                             <span class="label">Suma:</span> <span style="color:#aaffaa; font-weight:bold; font-size:1.1em;">$${d.totalPrice.toFixed(2)}</span>
                         </div>`;
 
-                        if (d.customer === "Thomas Hale") {
-                            histThomas += hItem;
-                        } else {
-                            histClara += hItem;
-                        }
+                        if (d.customer === "Thomas Hale") { histThomas += hItem; grossThomas += d.totalPrice; }
+                        else { histClara += hItem; grossClara += d.totalPrice; }
                     }
                 });
 
+                document.getElementById('payout-clara').innerText = `$${grossClara.toFixed(2)}`;
+                document.getElementById('payout-thomas').innerText = `$${(grossThomas * 0.15).toFixed(2)}`;
+                
                 let bestItem = "---"; let maxQty = 0;
-                Object.entries(allTimeItemCounts).forEach(([name, qty]) => {
-                    if(qty > maxQty) { maxQty = qty; bestItem = name; }
-                });
-
-                const cTax = currentRev * 0.1; 
-                currentTaxDue = cTax;
-                const atTax = allTimeRev * 0.1;
-                const atNet = allTimeRev - atTax;
-
+                Object.entries(allTimeItemCounts).forEach(([name, qty]) => { if(qty > maxQty) { maxQty = qty; bestItem = name; } });
+                const cTax = currentRev * 0.1; currentTaxDue = cTax;
                 document.getElementById('total-revenue').innerText = `$${currentRev.toFixed(2)}`;
                 document.getElementById('list-total-sum').innerText = `$${currentRev.toFixed(2)}`;
                 document.getElementById('tax-amount').innerText = `-$${cTax.toFixed(2)}`;
                 document.getElementById('net-profit').innerText = `$${(currentRev - cTax).toFixed(2)}`;
-                
                 document.getElementById('at-gross').innerText = `$${allTimeRev.toFixed(2)}`;
-                document.getElementById('at-tax').innerText = `-$${atTax.toFixed(2)}`;
-                document.getElementById('at-net').innerText = `$${atNet.toFixed(2)}`;
-                document.getElementById('all-time-net-profit').innerText = `$${atNet.toFixed(2)}`;
-                
-                if(document.getElementById('tax-current-due')) {
-                    document.getElementById('tax-current-due').innerText = `$${cTax.toFixed(2)}`;
-                }
-
+                document.getElementById('at-tax').innerText = `-$${(allTimeRev*0.1).toFixed(2)}`;
+                document.getElementById('at-net').innerText = `$${(allTimeRev*0.9).toFixed(2)}`;
+                document.getElementById('all-time-net-profit').innerText = `$${(allTimeRev*0.9).toFixed(2)}`;
+                if(document.getElementById('tax-current-due')) document.getElementById('tax-current-due').innerText = `$${cTax.toFixed(2)}`;
                 document.getElementById('best-seller').innerText = bestItem + (maxQty > 0 ? ` (${maxQty} szt.)` : "");
                 document.getElementById('customer-count').innerText = totalOrders;
-                
-                document.getElementById('history-clara').innerHTML = histClara || '<p style="text-align:center; opacity:0.5;">Brak transakcji...</p>';
-                document.getElementById('history-thomas').innerHTML = histThomas || '<p style="text-align:center; opacity:0.5;">Brak transakcji...</p>';
-                
-                document.getElementById('items-sold-list').innerHTML = Object.entries(iStats).sort((a,b)=>b[1].r - a[1].r).map(([n,d])=>`<li><span>${n} (<span style="color:var(--gold);">${d.q}</span>)</span><span style="color:#fff;">$${d.r.toFixed(2)}</span></li>`).join('');
+                document.getElementById('history-clara').innerHTML = histClara || '<p style="text-align:center; opacity:0.5;">Brak...</p>';
+                document.getElementById('history-thomas').innerHTML = histThomas || '<p style="text-align:center; opacity:0.5;">Brak...</p>';
+                document.getElementById('items-sold-list').innerHTML = Object.entries(iStats).sort((a,b)=>b[1].r - a[1].r).map(([n,d])=>`<li><span>${n} (${d.q})</span><span>$${d.r.toFixed(2)}</span></li>`).join('');
             });
         }
     </script>
