@@ -509,14 +509,19 @@
 
         // --- LOGIKA KREATORA ZESTAWÓW ---
         window.openBuilder = () => {
-            let listHtml = '';
+            let listHtml = `
+            <style>
+                .builder-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; margin-bottom: 6px; border-radius: 4px; border: 1px solid transparent; }
+                .builder-item:hover { background: rgba(209, 178, 111, 0.1); border-color: rgba(209, 178, 111, 0.3); }
+                .builder-qty { width: 60px; background: #17120e; color: var(--gold); border: 1px solid var(--gold); padding: 8px; text-align: center; font-family: 'Rye'; font-size: 1.1em; border-radius: 4px; outline: none; }
+            </style>`;
+
             menuData.forEach(m => {
                 if(!m.isCustom) {
                     listHtml += `
                     <label class="builder-item">
-                        <input type="checkbox" value="${m.n}" class="builder-cb builder-cb-input">
-                        <div class="builder-box"></div>
                         <span style="color: var(--parchment); font-weight: bold; font-size: 1.1em; font-family: 'Roboto';">${m.n}</span>
+                        <input type="number" min="0" max="99" value="0" class="builder-qty" data-name="${m.n}">
                     </label>`;
                 }
             });
@@ -528,22 +533,35 @@
         window.closeBuilder = () => { document.getElementById('builder-modal').style.display = 'none'; };
 
         window.saveComboToMenu = () => {
-            const checkboxes = document.querySelectorAll('.builder-cb:checked');
+            const inputs = document.querySelectorAll('.builder-qty');
             const price = parseFloat(document.getElementById('builder-price').value);
-
-            if (checkboxes.length === 0) return alert("Zaznacz z czego składa się zestaw!");
-            if (isNaN(price) || price < 0) return alert("Podaj prawidłową cenę za całość!");
 
             let selectedNames = []; 
             let recipes = [];
+            let hasItems = false;
             
-            checkboxes.forEach(cb => {
-                selectedNames.push(cb.value);
-                let product = menuData.find(m => m.n === cb.value);
-                if(product && product.r) recipes.push(product.r);
+            inputs.forEach(input => {
+                let qty = parseInt(input.value);
+                if (qty > 0) {
+                    hasItems = true;
+                    let productName = input.getAttribute('data-name');
+                    
+                    // Dodaje ilość np. "3x Piwo"
+                    selectedNames.push(`${qty}x ${productName}`);
+                    
+                    let product = menuData.find(m => m.n === productName);
+                    if(product && product.r) {
+                        // Klonuje przepis, jeśli wybrano więcej niż 1 sztukę
+                        for(let i = 0; i < qty; i++) {
+                            recipes.push(product.r);
+                        }
+                    }
+                }
             });
 
-            // Sama buduje nazwę (bez pytania w input)
+            if (!hasItems) return alert("Wybierz przynajmniej jeden produkt (zmień ilość na plus)!");
+            if (isNaN(price) || price < 0) return alert("Podaj prawidłową cenę za całość!");
+
             let customName = "Promocja: " + selectedNames.join(" + ");
             let combinedRecipe = recipes.join(', '); 
             let comboId = "combo_" + Date.now(); 
