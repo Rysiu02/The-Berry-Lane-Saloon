@@ -128,6 +128,29 @@
         @media screen and (max-width: 800px) { .pos-grid, .stats-grid, .kitchen-grid { grid-template-columns: 1fr; } .products-section { grid-template-columns: 1fr 1fr; } }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #634b35; }
+
+        /* --- STYLE KAFELKA ZESTAWU --- */
+        .custom-combo-container { position: relative; display: flex; width: 100%; }
+        .delete-combo-btn { 
+            position: absolute; top: -8px; right: -8px; 
+            background: var(--red-bright); color: white; 
+            border: 2px solid #000; border-radius: 50%; 
+            width: 28px; height: 28px; font-weight: bold; 
+            cursor: pointer; z-index: 10; 
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5); transition: 0.2s;
+        }
+        .delete-combo-btn:hover { transform: scale(1.2); background: #ff3333; }
+/* --- STYLE KREATORA ZESTAWÓW --- */
+        .custom-combo-container { position: relative; display: flex; width: 100%; }
+        .delete-combo-btn { position: absolute; top: -8px; right: -8px; background: var(--red-bright); color: white; border: 2px solid #000; border-radius: 50%; width: 28px; height: 28px; font-weight: bold; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.5); transition: 0.2s; }
+        .delete-combo-btn:hover { transform: scale(1.2); background: #ff3333; }
+        .builder-item { display: flex; align-items: center; padding: 8px 12px; margin-bottom: 6px; border-radius: 4px; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; }
+        .builder-item:hover { background: rgba(209, 178, 111, 0.1); border-color: rgba(209, 178, 111, 0.3); }
+        .builder-cb-input { display: none; }
+        .builder-box { width: 22px; height: 22px; border: 2px solid var(--gold); border-radius: 4px; margin-right: 15px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); transition: all 0.2s; }
+        .builder-cb-input:checked + .builder-box { background: var(--gold); box-shadow: 0 0 8px rgba(209, 178, 111, 0.4); }
+        .builder-cb-input:checked + .builder-box::after { content: '✔'; color: #000; font-weight: bold; font-size: 16px; }
     </style>
 </head>
 <body>
@@ -142,6 +165,22 @@
             </div>
         </div>
     </div>
+    <div id="builder-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 1000; justify-content: center; align-items: center;">
+        <div class="custom-modal" style="max-height: 90vh; overflow-y: auto; width: 90%; max-width: 400px;">
+            <h2 style="color: var(--gold); font-family: 'Rye'; border-bottom: 2px solid #634b35; padding-bottom: 10px; margin-top: 0;">Zbuduj Zestaw</h2>
+            
+            <div id="builder-list" style="text-align: left; margin-bottom: 15px; max-height: 220px; overflow-y: auto; border: 1px solid #634b35; padding: 10px; border-radius: 4px; background: rgba(0,0,0,0.3);">
+                </div>
+            
+            
+            <input type="number" id="builder-price" placeholder="Cena zestawu ($)" style="width: 100%; padding: 12px; margin-bottom: 15px; background: #17120e; color: var(--gold); border: 1px solid #634b35; font-family: 'Rye'; font-size: 1.2em; text-align: center; box-sizing: border-box; border-radius: 4px; outline: none;">
+            
+            <div class="modal-btns">
+                <button class="m-btn" onclick="saveComboToMenu()" style="background:var(--gold); color:#000; flex: 1; border-color: #000;">STWÓRZ</button>
+                <button class="m-btn" onclick="closeBuilder()" style="background:#444; color:#ccc; flex: 1;">ANULUJ</button>
+            </div>
+        </div>
+    </div>
     <div id="promo-modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 1001; justify-content: center; align-items: center;">
     <div class="custom-modal">
         <h2 id="promo-modal-title" style="color:var(--gold); font-family:'Rye';">Promocja</h2>
@@ -153,6 +192,22 @@
         </div>
     </div>
 </div>
+
+<div id="builder-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 1000; justify-content: center; align-items: center;">
+        <div class="custom-modal" style="max-height: 90vh; overflow-y: auto; width: 90%; max-width: 400px;">
+            <h2 style="color: var(--gold); font-family: 'Rye'; border-bottom: 2px solid #634b35; padding-bottom: 10px; margin-top: 0;">Zbuduj Zestaw</h2>
+            
+            <div id="builder-list" style="text-align: left; margin-bottom: 15px; max-height: 220px; overflow-y: auto; border: 1px solid #634b35; padding: 10px; border-radius: 4px; background: rgba(0,0,0,0.3);">
+            </div>
+            
+            <input type="number" id="builder-price" placeholder="Cena zestawu ($)" style="width: 100%; padding: 12px; margin-bottom: 15px; background: #17120e; color: var(--gold); border: 1px solid #634b35; font-family: 'Rye'; font-size: 1.2em; text-align: center; box-sizing: border-box; border-radius: 4px; outline: none;">
+            
+            <div class="modal-btns">
+                <button class="m-btn" onclick="saveComboToMenu()" style="background:var(--gold); color:#000; flex: 1; border-color: #000;">STWÓRZ</button>
+                <button class="m-btn" onclick="closeBuilder()" style="background:#444; color:#ccc; flex: 1;">ANULUJ</button>
+            </div>
+        </div>
+    </div>
 
     <div class="pos-container">
         <h1>The Berry Lane Saloon</h1>
@@ -181,6 +236,7 @@
                     <div class="total-row"><span>SUMA:</span><span id="receipt-total">$0.00</span></div>
                     <button class="sell-btn" onclick="completeSale()">ZATWIERDŹ SPRZEDAŻ</button>
                     <button class="clear-btn" onclick="clearReceipt()">WYCZYŚĆ MENU</button>
+                    <button class="archive-btn" style="margin-top:10px; background-color: rgba(209, 178, 111, 0.1); color: var(--gold); border-color: var(--gold); border-style: dashed;" onclick="openBuilder()">+ ZBUDUJ NOWY ZESTAW</button>
                 </div>
             </div>
         </div>
@@ -307,7 +363,7 @@
             { n: 'Kawa', p: 2, r: '2x Woda' },
             { n: 'Wino', p: 3, r: '2x Jabłko, 1x Woda' },
             { n: 'Śniadanie', p: 6, r: '2x Mięso, 1x Jajko, 1x Woda' },
-            { n: 'Ryba / Ziemniak', p: 6, r: '3x Ryba, 2x Ziemniak' },
+            { n: 'Ryba z Ziemniakami', p: 6, r: '3x Ryba, 2x Ziemniak' },
             { n: 'Ciasto kura', p: 7, r: '2x Drób, 2x Pszenica, 2x Jajko' },
             { n: 'Piwo malina', p: 4, r: '2x Malina, 1x Woda' },
             { n: 'Placek wołowy', p: 8, r: '2x Wołowina, 2x Pszenica, 2x Jajko' }
@@ -404,7 +460,131 @@
             updateUI();
         };
         window.clearReceipt = () => { currentReceipt = []; currentTotal = 0; updateUI(); };
+        // --- SYSTEM BUDOWANIA ZESTAWÓW NA STRONIE ---
+        window.openBuilder = () => {
+            let listHtml = '';
+            menuData.forEach(m => {
+                if(!m.isCustom) { // Pokazujemy tylko bazowe produkty
+                    listHtml += `
+                    <label style="display: flex; align-items: center; padding: 8px; cursor: pointer; border-bottom: 1px solid #3b2f25;">
+                        <input type="checkbox" value="${m.n}" class="builder-cb" style="width: 20px; height: 20px; margin-right: 15px; accent-color: var(--gold);">
+                        <span style="color: var(--parchment); font-weight: bold; font-size: 1.1em;">${m.n}</span>
+                    </label>`;
+                }
+            });
+            document.getElementById('builder-list').innerHTML = listHtml;
+            document.getElementById('builder-name').value = '';
+            document.getElementById('builder-price').value = '';
+            document.getElementById('builder-modal').style.display = 'flex';
+        };
 
+        // --- SYSTEM BUDOWANIA ZESTAWÓW NA STRONIE ---
+        window.openBuilder = () => {
+            // Dodajemy ładne style dla checkboxów
+            let listHtml = `
+            <style>
+                .builder-item { display: flex; align-items: center; padding: 8px 12px; margin-bottom: 6px; border-radius: 4px; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; }
+                .builder-item:hover { background: rgba(209, 178, 111, 0.1); border-color: rgba(209, 178, 111, 0.3); }
+                .builder-cb-input { display: none; }
+                .builder-box { width: 22px; height: 22px; border: 2px solid var(--gold); border-radius: 4px; margin-right: 15px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); transition: all 0.2s; }
+                .builder-cb-input:checked + .builder-box { background: var(--gold); box-shadow: 0 0 8px rgba(209, 178, 111, 0.4); }
+                .builder-cb-input:checked + .builder-box::after { content: '✔'; color: #000; font-weight: bold; font-size: 16px; }
+            </style>`;
+
+            menuData.forEach(m => {
+                if(!m.isCustom) { // Pokazujemy tylko bazowe produkty
+                    listHtml += `
+                    <label class="builder-item">
+                        <input type="checkbox" value="${m.n}" class="builder-cb builder-cb-input">
+                        <div class="builder-box"></div>
+                        <span style="color: var(--parchment); font-weight: bold; font-size: 1.1em; font-family: 'Roboto';">${m.n}</span>
+                    </label>`;
+                }
+            });
+            document.getElementById('builder-list').innerHTML = listHtml;
+            document.getElementById('builder-name').value = '';
+            document.getElementById('builder-price').value = '';
+            document.getElementById('builder-modal').style.display = 'flex';
+        };
+
+        // --- LOGIKA KREATORA ZESTAWÓW ---
+        window.openBuilder = () => {
+            let listHtml = '';
+            menuData.forEach(m => {
+                if(!m.isCustom) {
+                    listHtml += `
+                    <label class="builder-item">
+                        <input type="checkbox" value="${m.n}" class="builder-cb builder-cb-input">
+                        <div class="builder-box"></div>
+                        <span style="color: var(--parchment); font-weight: bold; font-size: 1.1em; font-family: 'Roboto';">${m.n}</span>
+                    </label>`;
+                }
+            });
+            document.getElementById('builder-list').innerHTML = listHtml;
+            document.getElementById('builder-price').value = '';
+            document.getElementById('builder-modal').style.display = 'flex';
+        };
+
+        window.closeBuilder = () => { document.getElementById('builder-modal').style.display = 'none'; };
+
+        window.saveComboToMenu = () => {
+            const checkboxes = document.querySelectorAll('.builder-cb:checked');
+            const price = parseFloat(document.getElementById('builder-price').value);
+
+            if (checkboxes.length === 0) return alert("Zaznacz z czego składa się zestaw!");
+            if (isNaN(price) || price < 0) return alert("Podaj prawidłową cenę za całość!");
+
+            let selectedNames = []; 
+            let recipes = [];
+            
+            checkboxes.forEach(cb => {
+                selectedNames.push(cb.value);
+                let product = menuData.find(m => m.n === cb.value);
+                if(product && product.r) recipes.push(product.r);
+            });
+
+            // Sama buduje nazwę (bez pytania w input)
+            let customName = "Promocja: " + selectedNames.join(" + ");
+            let combinedRecipe = recipes.join(', '); 
+            let comboId = "combo_" + Date.now(); 
+
+            menuData.push({ n: customName, p: price, r: combinedRecipe, isCustom: true, id: comboId });
+
+            let posHtml = `
+            <div class="custom-combo-container" id="${comboId}_pos">
+                <button class="delete-combo-btn" onclick="removeCombo('${comboId}')">✖</button>
+                <button class="product-btn" style="width:100%; border: 2px dashed var(--gold); background: rgba(209, 178, 111, 0.1);" onclick="addToReceipt('${customName}', ${price})">
+                    <strong style="color:var(--gold); font-size:1em;">${customName}</strong>
+                    <span>$${price}.00</span>
+                </button>
+            </div>`;
+            document.getElementById('products').insertAdjacentHTML('beforeend', posHtml);
+
+            let kitHtml = `
+            <div class="recipe-card" id="${comboId}_kit" style="border-color: var(--gold); background: rgba(209, 178, 111, 0.05);">
+                <h3 style="color: var(--gold); border-bottom-color: var(--gold);">${customName} <span style="color:var(--red-bright); cursor:pointer; float:right;" onclick="removeCombo('${comboId}')">✖</span></h3>
+                <ul><li>${combinedRecipe || "Brak składników"}</li></ul>
+            </div>`;
+            document.getElementById('kitchen-recipes').insertAdjacentHTML('beforeend', kitHtml);
+
+            let calcHtml = `
+            <div class="calc-row" id="${comboId}_calc">
+                <span style="color:var(--gold); font-family:'Rye'; font-size:0.9em;">${customName}</span>
+                <input type="number" min="0" value="0" class="calc-input" data-name="${customName}" oninput="calculateIngredients()">
+            </div>`;
+            document.getElementById('calc-inputs').insertAdjacentHTML('beforeend', calcHtml);
+
+            closeBuilder();
+        };
+
+        window.removeCombo = (id) => {
+            const index = menuData.findIndex(m => m.id === id);
+            if(index > -1) menuData.splice(index, 1);
+            const elPos = document.getElementById(id + '_pos'); if(elPos) elPos.remove();
+            const elKit = document.getElementById(id + '_kit'); if(elKit) elKit.remove();
+            const elCalc = document.getElementById(id + '_calc'); if(elCalc) elCalc.remove();
+            calculateIngredients();
+        };
         // PROMOCJA
         // Otwieranie modala promocji
 window.applyPromo = (index) => {
@@ -606,6 +786,7 @@ window.closePromoModal = () => {
                 document.getElementById('items-sold-list').innerHTML = Object.entries(iStats).sort((a,b)=>b[1].r - a[1].r).map(([n,d])=>`<li><span>${n} (${d.q})</span><span>$${d.r.toFixed(2)}</span></li>`).join('');
             });
         }
+
     </script>
 </body>
 </html>
