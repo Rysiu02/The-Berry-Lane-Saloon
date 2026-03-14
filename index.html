@@ -691,6 +691,21 @@
 
         let currentReceipt = []; let currentTotal = 0;
         window.addToReceipt = (name, price) => {
+            const menuItem = menuData.find(m => m.n === name);
+
+if(menuItem && menuItem.components){
+    for(const c of menuItem.components){
+        if(productsData[c.name] < c.qty){
+            showCustomAlert("Brak produktu: " + c.name);
+            return;
+        }
+    }
+
+    for(const c of menuItem.components){
+        window.updatePosProduct(c.name, -c.qty);
+    }
+}
+
             if (window.updatePosProduct && productsData[name] !== undefined) {
         if (productsData[name] > 0) {
             window.updatePosProduct(name, -1);
@@ -707,11 +722,25 @@
     // Jeśli anulujemy rachunek (kliknięcie czerwonego przycisku), zwracamy towar na stan
     if (isCancel === true) {
         currentReceipt.forEach(item => {
-            // W Twoim kodzie ilość sztuk to "quantity"
-            if (window.updatePosProduct && typeof productsData !== 'undefined' && productsData[item.name] !== undefined) {
-                window.updatePosProduct(item.name, item.quantity); 
+
+    const menuItem = menuData.find(m => m.n === item.name);
+
+    // jeśli to zestaw
+    if(menuItem && menuItem.components){
+        menuItem.components.forEach(c=>{
+            if(window.updatePosProduct){
+                window.updatePosProduct(c.name, c.qty * item.quantity);
             }
         });
+    }
+
+    // jeśli to zwykły produkt
+    else if (window.updatePosProduct && productsData[item.name] !== undefined) {
+        window.updatePosProduct(item.name, item.quantity); 
+    }
+
+});
+
     }
     
     currentReceipt = []; 
@@ -824,7 +853,21 @@
             let combinedRecipe = recipes.join(', '); 
             let comboId = "combo_" + Date.now(); 
 
-            menuData.push({ n: customName, p: price, r: combinedRecipe, isCustom: true, id: comboId });
+            menuData.push({ 
+    n: customName,
+    p: price,
+    r: combinedRecipe,
+    isCustom: true,
+    id: comboId,
+    components: selectedNames.map(x => {
+        const parts = x.split('x ');
+        return {
+            qty: parseInt(parts[0]),
+            name: parts[1]
+        };
+    })
+});
+
 
             let posHtml = `
             <div class="custom-combo-container" id="${comboId}_pos">
