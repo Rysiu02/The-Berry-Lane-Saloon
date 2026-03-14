@@ -151,6 +151,225 @@
         .builder-box { width: 22px; height: 22px; border: 2px solid var(--gold); border-radius: 4px; margin-right: 15px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); transition: all 0.2s; }
         .builder-cb-input:checked + .builder-box { background: var(--gold); box-shadow: 0 0 8px rgba(209, 178, 111, 0.4); }
         .builder-cb-input:checked + .builder-box::after { content: '✔'; color: #000; font-weight: bold; font-size: 16px; }
+
+        /* --- KARTKA MAGAZYNU (KUCHNIA) --- */
+.inventory-note {
+    position: fixed;
+    top: 50%;
+    left: 20px;
+    width: 260px;
+    background-color: var(--parchment);
+    color: var(--wood-dark);
+    padding: 25px 20px 20px 20px;
+    box-shadow: 4px 8px 20px rgba(0,0,0,0.7);
+    border-radius: 2px;
+    font-family: 'Roboto', sans-serif;
+    z-index: 100;
+    /* Przesunięcie na środek w pionie i lekkie obrócenie dla realizmu */
+    transform: translateY(-50%) rotate(-3deg);
+    border: 1px solid #c2b296;
+}
+
+/* Plaster mocujący */
+.inventory-note::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%) rotate(5deg);
+    width: 90px;
+    height: 28px;
+    background-color: rgba(220, 200, 180, 0.85);
+    box-shadow: 1px 1px 4px rgba(0,0,0,0.3);
+    border-radius: 2px;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.inventory-title {
+    font-family: 'Rye', cursive;
+    text-align: center;
+    border-bottom: 2px dashed #8c7355;
+    margin: 0 0 15px 0;
+    padding-bottom: 5px;
+    font-size: 1.3em;
+    color: #5c3a21;
+}
+
+.inventory-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 15px 0;
+    /* Usuwamy ograniczenie wysokości, aby schować pasek przewijania */
+    max-height: none; 
+    overflow-y: visible;
+}
+
+.inventory-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* Zmniejszony padding (odstępy z góry i dołu), aby zmieścić więcej elementów */
+    padding: 3px 0; 
+    border-bottom: 1px solid rgba(92, 58, 33, 0.2);
+    /* Nieco mniejsza czcionka */
+    font-size: 0.85em; 
+    font-weight: bold;
+}
+
+.inventory-controls {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.inv-btn {
+    background-color: #5c3a21;
+    color: var(--parchment);
+    border: none;
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    padding: 0;
+    transition: 0.2s;
+}
+
+.inv-btn:hover { background-color: var(--gold); color: #000; transform: scale(1.1); }
+.inv-btn.del-btn { background-color: var(--red-bright); }
+.inv-btn.del-btn:hover { background-color: red; }
+
+.add-inv-box {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: rgba(0,0,0,0.05);
+    padding: 12px;
+    border-radius: 4px;
+    border: 1px dashed #8c7355;
+}
+
+.add-inv-box input {
+    padding: 8px;
+    border: 1px solid #8c7355;
+    border-radius: 3px;
+    background: #fff;
+    color: #000;
+    outline: none;
+    font-weight: bold;
+}
+
+.add-inv-box button {
+    background-color: var(--green);
+    color: white;
+    font-family: 'Rye', cursive;
+    padding: 8px;
+    border: 2px solid #000;
+    cursor: pointer;
+    border-radius: 4px;
+}
+.add-inv-box button:hover { background-color: var(--green-bright); border-color: var(--gold); }
+
+/* Dla mniejszych ekranów chowamy z boku i wpinamy w layout, żeby nie zasłaniało strony */
+@media screen and (max-width: 1400px) {
+    .inventory-note {
+        position: relative;
+        top: 0;
+        left: 0;
+        transform: none;
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+    }
+    .inventory-note::before { display: none; }
+}
+
+/* --- KARTKA GOTOWYCH PRODUKTÓW (Prawa strona) --- */
+.products-note {
+    position: fixed;
+    top: 50%;
+    right: 20px; /* Przyklejona do prawej krawędzi */
+    width: 260px;
+    background-color: var(--parchment);
+    color: var(--wood-dark);
+    padding: 25px 20px 20px 20px;
+    box-shadow: -4px 8px 20px rgba(0,0,0,0.7);
+    border-radius: 2px;
+    font-family: 'Roboto', sans-serif;
+    z-index: 100;
+    /* Przechylona lekko w drugą stronę dla balansu */
+    transform: translateY(-50%) rotate(3deg);
+    border: 1px solid #c2b296;
+}
+
+.products-note::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-5deg);
+    width: 90px;
+    height: 28px;
+    background-color: rgba(220, 200, 180, 0.85);
+    box-shadow: 1px 1px 4px rgba(0,0,0,0.3);
+    border-radius: 2px;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+/* Wygląd ilości na przyciskach kasy */
+.stock-badge {
+    display: block;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    font-size: 0.8em;
+    padding: 3px 6px;
+    border-radius: 8px;
+    margin-top: 5px;
+    font-family: monospace;
+    font-weight: bold;
+}
+
+/* Wersja mobilna/tablet (odklejenie prawej kartki na mniejszych ekranach) */
+@media screen and (max-width: 1400px) {
+    .products-note {
+        position: relative;
+        top: 0;
+        right: 0;
+        transform: none;
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+    }
+    .products-note::before { display: none; }
+}
+
+/* --- STYL WŁASNEGO OKIENKA (ALERTY) --- */
+        .custom-alert-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;
+        }
+        .custom-alert-box {
+            background-color: var(--parchment); color: var(--wood-dark);
+            padding: 30px; border-radius: 4px; border: 3px solid #634b35;
+            box-shadow: inset 0 0 20px rgba(99, 75, 53, 0.2), 4px 8px 30px rgba(0,0,0,0.9);
+            text-align: center; max-width: 400px; width: 90%; font-family: 'Roboto', sans-serif;
+            position: relative;
+        }
+        .custom-alert-title {
+            font-family: 'Rye', cursive; font-size: 1.8em; color: var(--red-bright);
+            margin-top: 0; border-bottom: 2px dashed #8c7355; padding-bottom: 10px; margin-bottom: 20px;
+        }
+        .custom-alert-msg { font-size: 1.1em; font-weight: bold; margin-bottom: 25px; line-height: 1.6; }
+        .custom-alert-btn {
+            background-color: #5c3a21; color: var(--parchment); font-family: 'Rye', cursive;
+            border: 2px solid #000; padding: 10px 30px; font-size: 1.2em; cursor: pointer;
+            border-radius: 4px; transition: 0.2s;
+        }
+        .custom-alert-btn:hover { background-color: var(--red-bright); color: #fff; border-color: var(--gold); transform: scale(1.05); }
     </style>
 </head>
 <body>
@@ -235,7 +454,7 @@
                     <ul id="receipt-items"></ul>
                     <div class="total-row"><span>SUMA:</span><span id="receipt-total">$0.00</span></div>
                     <button class="sell-btn" onclick="completeSale()">ZATWIERDŹ SPRZEDAŻ</button>
-                    <button class="clear-btn" onclick="clearReceipt()">WYCZYŚĆ MENU</button>
+                    <button class="clear-btn" onclick="clearReceipt(true)">WYCZYŚĆ MENU</button>
                     <button class="archive-btn" style="margin-top:10px; background-color: rgba(209, 178, 111, 0.1); color: var(--gold); border-color: var(--gold); border-style: dashed;" onclick="openBuilder()">+ ZBUDUJ NOWY ZESTAW</button>
                 </div>
             </div>
@@ -319,6 +538,23 @@
 
         <div id="tab-kitchen" class="tab-content">
             <div class="stats-grid" style="margin-bottom: 30px;">
+                <div class="inventory-note">
+        <h3 class="inventory-title">Stan Magazynu</h3>
+        <ul class="inventory-list" id="inventory-list">
+            </ul>
+        <div class="add-inv-box">
+            <input type="text" id="new-inv-name" placeholder="Nazwa produktu...">
+            <div style="display: flex; gap: 5px;">
+                <input type="number" id="new-inv-qty" placeholder="Ilość" value="1" min="1" style="width: 70px;">
+                <button style="flex: 1;" onclick="addInventoryItem()">+ DODAJ</button>
+            </div>
+        </div>
+    </div>
+    <div class="products-note">
+            <h3 style="font-family:'Rye'; text-align:center; border-bottom:2px dashed #8c7355; margin:0 0 15px 0; padding-bottom:5px; font-size:1.3em; color:#5c3a21;">Stan Produktów</h3>
+            <ul class="inventory-list" id="products-list">
+                </ul>
+        </div>
                 <div class="stats-panel">
                     <h3 style="color:var(--gold); border-bottom:1px solid var(--gold); padding-bottom:10px; margin-top:0;">Kalkulator Zamówień</h3>
                     <div id="calc-inputs" style="max-height: 250px; overflow-y: auto; padding-right:10px;">
@@ -455,11 +691,33 @@
 
         let currentReceipt = []; let currentTotal = 0;
         window.addToReceipt = (name, price) => {
+            if (window.updatePosProduct && productsData[name] !== undefined) {
+        if (productsData[name] > 0) {
+            window.updatePosProduct(name, -1);
+        } else {
+            showCustomAlert("Brak produktu na stanie!");
+            return; // Zatrzymuje dodawanie do koszyka!
+        }
+    }
             const item = currentReceipt.find(i => i.name === name);
             if(item) item.quantity++; else currentReceipt.push({name, price, quantity: 1});
             updateUI();
         };
-        window.clearReceipt = () => { currentReceipt = []; currentTotal = 0; updateUI(); };
+        window.clearReceipt = (isCancel = false) => { 
+    // Jeśli anulujemy rachunek (kliknięcie czerwonego przycisku), zwracamy towar na stan
+    if (isCancel === true) {
+        currentReceipt.forEach(item => {
+            // W Twoim kodzie ilość sztuk to "quantity"
+            if (window.updatePosProduct && typeof productsData !== 'undefined' && productsData[item.name] !== undefined) {
+                window.updatePosProduct(item.name, item.quantity); 
+            }
+        });
+    }
+    
+    currentReceipt = []; 
+    currentTotal = 0; 
+    updateUI(); 
+};
         // --- SYSTEM BUDOWANIA ZESTAWÓW NA STRONIE ---
         window.openBuilder = () => {
             let listHtml = '';
@@ -805,6 +1063,353 @@ window.closePromoModal = () => {
             });
         }
 
+// ==========================================================
+        // === ZINTEGROWANY SYSTEM MAGAZYNU (LEWA I PRAWA KARTKA) ===
+        // ==========================================================
+
+        // --- 1. BAZY DANYCH ---
+        const inventoryDocRef = doc(db, "pos_metadata", "kitchen_inventory");
+        const productsDocRef = doc(db, "pos_metadata", "ready_products_inventory");
+        
+        window.inventoryData = {};
+        window.productsData = {};
+
+        // Emotki dla surowców
+        const itemEmojis = {
+            "Kukurydza": "🌽", "Jabłko": "🍎", "Ryba": "🐟", "Mleko": "🥛",
+            "Marchewka": "🥕", "Woda": "💧", "Mięso": "🍖", "Wołowina": "🥩",
+            "Ziemniak": "🥔", "Jajko": "🥚", "Jagoda": "🫐", "Drób": "🍗",
+            "Malina": "🍓", "Pszenica": "🌾"
+        };
+
+        // --- 2. NASŁUCHIWANIE BAZY NA ŻYWO ---
+        onSnapshot(inventoryDocRef, (docSnap) => {
+            if (docSnap.exists()) window.inventoryData = docSnap.data();
+            else setDoc(inventoryDocRef, {});
+            if (window.renderInventory) window.renderInventory();
+            if (window.renderProducts) window.renderProducts(); // Odświeża prawą po zmianie surowców
+        });
+
+        onSnapshot(productsDocRef, (docSnap) => {
+            if (docSnap.exists()) window.productsData = docSnap.data();
+            else setDoc(productsDocRef, {});
+            if (window.renderProducts) window.renderProducts();
+            if (window.updatePosButtonsStock) window.updatePosButtonsStock();
+        });
+
+        // --- 3. LEWA KARTKA (SUROWCE) ---
+        window.renderInventory = () => {
+            const list = document.getElementById('inventory-list');
+            if(!list) return;
+            
+            let html = '';
+            const sortedItems = Object.keys(window.inventoryData).sort();
+
+            for(let item of sortedItems) {
+                let emoji = itemEmojis[item] || "📦"; 
+                let qty = window.inventoryData[item];
+                
+                html += `
+                <li class="inventory-item">
+                    <span style="display: flex; align-items: center; gap: 5px;">
+                        <span style="font-size: 1.2em;">${emoji}</span> ${item}
+                    </span>
+                    <div class="inventory-controls">
+                        <button class="inv-btn" onclick="updateInventory('${item}', -1)">-</button>
+                        <input type="number" value="${qty}" 
+                               onchange="setInventoryItem('${item}', this.value)" 
+                               style="width: 45px; text-align: center; font-weight: bold; background: rgba(255,255,255,0.4); border: 1px solid rgba(92, 58, 33, 0.5); border-radius: 3px; padding: 2px; color: #241c15; outline: none; margin: 0 2px;">
+                        <button class="inv-btn" onclick="updateInventory('${item}', 1)">+</button>
+                        <button class="inv-btn del-btn" onclick="removeInventoryItem('${item}')">✖</button>
+                    </div>
+                </li>`;
+            }
+            if(html === '') html = '<li style="opacity:0.6; text-align:center; font-weight:normal;">Brak surowców na stanie...</li>';
+            list.innerHTML = html;
+        };
+
+        window.updateInventory = async (item, amount) => {
+            let currentQty = parseInt(window.inventoryData[item]) || 0;
+            let newValue = currentQty + amount;
+            if(newValue < 0) newValue = 0;
+            await updateDoc(inventoryDocRef, { [item]: newValue });
+        };
+        window.setInventoryItem = async (item, newValue) => {
+            let val = parseInt(newValue);
+            if (isNaN(val) || val < 0) val = 0;
+            await updateDoc(inventoryDocRef, { [item]: val });
+        };
+        window.removeInventoryItem = async (item) => {
+            let newData = { ...window.inventoryData };
+            delete newData[item];
+            await setDoc(inventoryDocRef, newData);
+        };
+        window.addInventoryItem = async () => {
+            const nameInput = document.getElementById('new-inv-name');
+            const qtyInput = document.getElementById('new-inv-qty');
+            let name = nameInput.value.trim();
+            if (name) name = name.charAt(0).toUpperCase() + name.slice(1);
+            const qty = parseInt(qtyInput.value) || 0;
+            if(name && qty > 0) {
+                let currentQty = parseInt(window.inventoryData[name]) || 0;
+                await setDoc(inventoryDocRef, { [name]: currentQty + qty }, { merge: true });
+                nameInput.value = ''; qtyInput.value = '1';
+            }
+        };
+
+        // --- 4. CZYTANIE PRZEPISÓW Z menuData ---
+        window.parseRecipe = (recipeString) => {
+            let reqs = {};
+            if(!recipeString || typeof recipeString !== 'string') return reqs; 
+            let parts = recipeString.split(','); 
+            parts.forEach(p => {
+                let splitPart = p.split('x'); 
+                if (splitPart.length === 2) {
+                    let qty = parseInt(splitPart[0].trim());
+                    let name = splitPart[1].trim();
+                    if (!isNaN(qty) && name) reqs[name] = qty;
+                }
+            });
+            return reqs;
+        };
+
+        window.craftProduct = async (itemName) => {
+            const menuItem = menuData.find(m => m.n === itemName);
+            if (menuItem && menuItem.r && window.inventoryData) {
+                const recipe = window.parseRecipe(menuItem.r);
+                if (Object.keys(recipe).length > 0) {
+                    let updates = {};
+                    for (let ing in recipe) {
+                        let currentQty = window.inventoryData[ing] || 0;
+                        let newQty = currentQty - recipe[ing];
+                        if (newQty < 0) newQty = 0;
+                        updates[ing] = newQty;
+                    }
+                    await updateDoc(inventoryDocRef, updates);
+                }
+            }
+            await window.updatePosProduct(itemName, 1);
+        };
+
+        // --- 5. PRAWA KARTKA (GOTOWE PRODUKTY) ---
+        // --- 4. ZARZĄDZANIE PRODUKCJĄ I ZWROTAMI ---
+        window.parseRecipe = (recipeString) => {
+            let reqs = {};
+            if(!recipeString || typeof recipeString !== 'string') return reqs; 
+            let parts = recipeString.split(','); 
+            parts.forEach(p => {
+                let splitPart = p.split('x'); 
+                if (splitPart.length === 2) {
+                    let qty = parseInt(splitPart[0].trim());
+                    let name = splitPart[1].trim();
+                    if (!isNaN(qty) && name) reqs[name] = qty;
+                }
+            });
+            return reqs;
+        };
+
+        // GOTOWANIE [+] (Pobiera surowce)
+        window.craftProduct = async (itemName) => {
+            const menuItem = menuData.find(m => m.n === itemName);
+            if (menuItem && menuItem.r && window.inventoryData) {
+                const recipe = window.parseRecipe(menuItem.r);
+                if (Object.keys(recipe).length > 0) {
+                    let updates = {};
+                    for (let ing in recipe) {
+                        let currentQty = window.inventoryData[ing] || 0;
+                        let newQty = currentQty - recipe[ing];
+                        if (newQty < 0) newQty = 0;
+                        updates[ing] = newQty;
+                    }
+                    await updateDoc(inventoryDocRef, updates);
+                }
+            }
+            await window.updatePosProduct(itemName, 1);
+        };
+
+        // ROZMONTOWANIE [-] (Zwraca surowce na magazyn)
+        window.uncraftProduct = async (itemName) => {
+            let currentProductQty = parseInt(window.productsData[itemName]) || 0;
+            if (currentProductQty <= 0) return; // Nie może oddać, jeśli nic nie ma na stanie
+
+            const menuItem = menuData.find(m => m.n === itemName);
+            if (menuItem && menuItem.r && window.inventoryData) {
+                const recipe = window.parseRecipe(menuItem.r);
+                if (Object.keys(recipe).length > 0) {
+                    let updates = {};
+                    for (let ing in recipe) {
+                        let currentQty = window.inventoryData[ing] || 0;
+                        updates[ing] = currentQty + recipe[ing]; // Oddaje surowce na stan
+                    }
+                    await updateDoc(inventoryDocRef, updates);
+                }
+            }
+            // Zabiera z prawej kartki
+            await window.updatePosProduct(itemName, -1); 
+        };
+
+        // RĘCZNA EDYCJA (Rozpoznaje czy wpisałeś więcej czy mniej i oddaje/pobiera resztę)
+        window.manualSetProduct = async (itemName, newValue) => {
+            let val = parseInt(newValue);
+            if (isNaN(val) || val < 0) val = 0;
+            
+            let currentQty = parseInt(window.productsData[itemName]) || 0;
+            let diff = val - currentQty; 
+            
+            if (diff === 0) return; // Nic się nie zmieniło
+
+            const menuItem = menuData.find(m => m.n === itemName);
+            
+            if (menuItem && menuItem.r && window.inventoryData) {
+                const recipe = window.parseRecipe(menuItem.r);
+                if (Object.keys(recipe).length > 0) {
+                    
+                    // Jeśli wpisuje WIĘCEJ - sprawdzamy, czy w ogóle starczy surowców na tyle porcji
+                    if (diff > 0) {
+                        let canCraft = true;
+                        let missing = [];
+                        for (let ing in recipe) {
+                            let currentIngQty = window.inventoryData[ing] || 0;
+                            let required = recipe[ing] * diff;
+                            if (currentIngQty < required) {
+                                canCraft = false;
+                                missing.push(`${ing} (${currentIngQty}/${required})`);
+                            }
+                        }
+                        if (!canCraft) {
+                            showCustomAlert(`Brak surowców na dorobienie <strong>${diff} szt.</strong><br>Brakuje:<br> <span style="color:var(--red-bright);">${missing.join('<br>')}</span>`);
+                            if (window.renderProducts) window.renderProducts(); // Cofa błędną liczbę z okienka
+                            return;
+                        }
+                    }
+
+                    // Obliczamy nowe stany surowców i wysyłamy do Firebase
+                    let updates = {};
+                    for (let ing in recipe) {
+                        let currentIngQty = window.inventoryData[ing] || 0;
+                        updates[ing] = currentIngQty - (recipe[ing] * diff);
+                    }
+                    await updateDoc(inventoryDocRef, updates);
+                }
+            }
+
+            // Na koniec zmieniamy ostateczną ilość potraw na prawej kartce
+            await window.setPosProduct(itemName, val);
+        };
+
+        // --- 5. PRAWA KARTKA (GOTOWE PRODUKTY) ---
+        window.renderProducts = () => {
+            const list = document.getElementById('products-list');
+            if(!list) return;
+            
+            let html = '';
+            menuData.forEach(item => {
+                let itemName = item.n; 
+                let qty = window.productsData[itemName] || 0; 
+                
+                let canCraft = true;
+                let missingIng = [];
+                let recipe = window.parseRecipe(item.r); 
+                
+                if (Object.keys(recipe).length > 0 && window.inventoryData) {
+                    for (let ing in recipe) {
+                        let currentStock = window.inventoryData[ing] || 0;
+                        if (currentStock < recipe[ing]) {
+                            canCraft = false;
+                            missingIng.push(`${ing} (${currentStock}/${recipe[ing]})`);
+                        }
+                    }
+                } else if (Object.keys(recipe).length > 0 && (!window.inventoryData || Object.keys(window.inventoryData).length === 0)) {
+                    canCraft = false;
+                    missingIng.push("Brak surowców w magazynie");
+                }
+
+                let rowStyle = canCraft ? "" : "background: rgba(163, 38, 32, 0.15); border-left: 3px solid var(--red-bright); padding-left: 5px; opacity: 0.9;";
+                let plusBtnStyle = canCraft ? "" : "background-color: gray; color: #ccc; cursor: not-allowed; transform: none;";
+                
+                let alertMsg = `Brak surowców! Brakuje:<br><span style='color:var(--red-bright);'>- ${missingIng.join('<br>- ')}</span>`;
+                let btnAction = canCraft 
+                    ? `onclick="craftProduct('${itemName}')"` 
+                    : `onclick="showCustomAlert('${alertMsg}')"`;
+
+                if (Object.keys(recipe).length === 0) {
+                    btnAction = `onclick="updatePosProduct('${itemName}', 1)"`;
+                }
+                
+                html += `
+                <li class="inventory-item" style="${rowStyle}">
+                    <span>🍹 ${itemName}</span>
+                    <div class="inventory-controls">
+                        <button class="inv-btn" onclick="uncraftProduct('${itemName}')">-</button>
+                        
+                        <input type="number" value="${qty}" 
+                               onchange="manualSetProduct('${itemName}', this.value)" 
+                               style="width: 45px; text-align: center; font-weight: bold; background: rgba(255,255,255,0.4); border: 1px solid rgba(92, 58, 33, 0.5); border-radius: 3px; padding: 2px; color: #241c15; outline: none; margin: 0 2px;">
+                               
+                        <button class="inv-btn" style="${plusBtnStyle}" ${btnAction}>+</button>
+                    </div>
+                </li>`;
+            });
+
+            list.innerHTML = html;
+        };
+
+        window.updatePosProduct = async (item, amount) => {
+            let currentQty = parseInt(window.productsData[item]) || 0;
+            let newValue = currentQty + amount;
+            if(newValue < 0) newValue = 0;
+            await updateDoc(productsDocRef, { [item]: newValue });
+        };
+        window.setPosProduct = async (item, newValue) => {
+            let val = parseInt(newValue);
+            if (isNaN(val) || val < 0) val = 0;
+            await updateDoc(productsDocRef, { [item]: val });
+        };
+
+        window.updatePosButtonsStock = () => {
+            const productButtons = document.querySelectorAll('.product-btn');
+            productButtons.forEach(btn => {
+                const strongTag = btn.querySelector('strong');
+                if (!strongTag) return; 
+                
+                const itemName = strongTag.innerText.trim(); 
+                if (window.productsData[itemName] !== undefined) {
+                    let stockBadge = btn.querySelector('.stock-badge');
+                    if (!stockBadge) {
+                        stockBadge = document.createElement('span');
+                        stockBadge.className = 'stock-badge';
+                        btn.appendChild(stockBadge);
+                    }
+                    const stock = window.productsData[itemName];
+                    stockBadge.innerText = `📦 ${stock} szt.`;
+                    
+                    if (stock <= 0) btn.style.opacity = '0.4';
+                    else btn.style.opacity = '1';
+                } else {
+                    let stockBadge = btn.querySelector('.stock-badge');
+                    if (stockBadge) {
+                        stockBadge.remove();
+                        btn.style.opacity = '1'; 
+                    }
+                }
+            });
+        };
+        // --- WŁASNE OKIENKA ALERTÓW ---
+        window.showCustomAlert = (message) => {
+            document.getElementById('customAlertMsg').innerHTML = message;
+            document.getElementById('customAlertOverlay').style.display = 'flex';
+        };
+        window.closeCustomAlert = () => {
+            document.getElementById('customAlertOverlay').style.display = 'none';
+        };
+
     </script>
+    <div id="customAlertOverlay" class="custom-alert-overlay">
+        <div class="custom-alert-box">
+            <h2 class="custom-alert-title">UWAGA!</h2>
+            <div id="customAlertMsg" class="custom-alert-msg">Tresc bledu</div>
+            <button class="custom-alert-btn" onclick="closeCustomAlert()">ZROZUMIANO</button>
+        </div>
+    </div>
 </body>
 </html>
