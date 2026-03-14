@@ -489,7 +489,7 @@
                         <span id="payout-thomas" style="color:#aaffaa">$0.00</span>
                     </h4>
                     <div class="history-list" id="history-thomas" style="max-height: 150px;"></div>
-                    <button class="sell-btn" style="font-size:0.8em; padding:8px;" onclick="settleEmployee('Thomas Hale')">ROZLICZ THOMASA (15%)</button>
+                    <button class="sell-btn" style="font-size:0.8em; padding:8px;" onclick="settleEmployee('Thomas Hale')">ROZLICZ THOMASA (50%) + $100</button>
 
                     <button class="archive-btn" style="margin-top:20px;" onclick="archiveCurrentSession()">ZAKOŃCZ ZMIANĘ</button>
                 </div>
@@ -1084,7 +1084,7 @@ window.closePromoModal = () => {
                 });
 
                 document.getElementById('payout-clara').innerText = `$${grossClara.toFixed(2)}`;
-                document.getElementById('payout-thomas').innerText = `$${(grossThomas * 0.15).toFixed(2)}`;
+                document.getElementById('payout-thomas').innerText = `$${((grossThomas * 0.50) + 100).toFixed(2)}`;
                 
                 let bestItem = "---"; let maxQty = 0;
                 Object.entries(allTimeItemCounts).forEach(([name, qty]) => { if(qty > maxQty) { maxQty = qty; bestItem = name; } });
