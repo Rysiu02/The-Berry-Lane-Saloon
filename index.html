@@ -968,41 +968,18 @@ window.closePromoModal = () => {
 
         // ROZLICZENIE PRACOWNIKA
         window.settleEmployee = async (name) => {
-
-    const amountId = (name === 'Clara Lane') ? 'payout-clara' : 'payout-thomas';
-    const amountVal = parseFloat(document.getElementById(amountId).innerText.replace('$', ''));
-
-    if (amountVal <= 0) return alert("Brak kwoty do wypłaty!");
-
-    openModal("Rozliczenie", `Czy wypłacono $${amountVal.toFixed(2)} dla ${name}?`, async () => {
-
-        try {
-
-            await addDoc(collection(db, "berry_lane_payouts"), {
-                employee: name,
-                amount: amountVal,
-                session: activeSessionName,
-                date: new Date().toLocaleString('pl-PL'),
-                createdAt: serverTimestamp()
+            const amountId = (name === 'Clara Lane') ? 'payout-clara' : 'payout-thomas';
+            const amountVal = parseFloat(document.getElementById(amountId).innerText.replace('$', ''));
+            if (amountVal <= 0) return alert("Brak kwoty do wypłaty!");
+            openModal("Rozliczenie", `Czy wypłacono $${amountVal.toFixed(2)} dla ${name}?`, async () => {
+                try {
+                    await addDoc(collection(db, "berry_lane_payouts"), {
+                        employee: name, amount: amountVal, session: activeSessionName,
+                        date: new Date().toLocaleString('pl-PL'), createdAt: serverTimestamp()
+                    });
+                } catch (e) { console.error(e); }
             });
-
-            /* WYCIERANIE ODPISÓW */
-            document.getElementById(amountId).innerText = "$0.00";
-
-            /* PIECZĄTKA */
-            const stamp = document.getElementById("settled-stamp");
-            stamp.style.display = "block";
-
-            setTimeout(() => {
-                stamp.style.display = "none";
-            }, 2500);
-
-        } catch (e) {
-            console.error(e);
-        }
-
-    });
-};
+        };
 
         function listenToPayouts() {
             onSnapshot(query(collection(db, "berry_lane_payouts"), orderBy("createdAt", "desc"), limit(10)), (s) => {
@@ -1477,8 +1454,5 @@ window.closePromoModal = () => {
             <button class="custom-alert-btn" onclick="closeCustomAlert()">ZROZUMIANO</button>
         </div>
     </div>
-    <div id="settled-stamp" class="settled-stamp">
-ROZLICZONO
-</div>
 </body>
 </html>
