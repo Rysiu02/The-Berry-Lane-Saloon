@@ -1,0 +1,364 @@
+        :root {
+            --wood-dark: #241c15;
+            --wood-medium: #3b2f25;
+            --gold: #d1b26f;
+            --parchment: #e3d5b8;
+            --red: #7b1e1a;
+            --red-bright: #a32620;
+            --green: #1a472a;
+            --green-bright: #2d6a41;
+        }
+
+        body {
+            background-color: var(--wood-medium);
+            background-image: url('https://www.transparenttextures.com/patterns/wood-pattern.png');
+            color: var(--parchment);
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .pos-container {
+            background-color: var(--wood-dark);
+            border: 4px solid #634b35;
+            box-shadow: 0 0 25px rgba(0,0,0,0.9);
+            width: 100%;
+            max-width: 1000px;
+            border-radius: 8px;
+            padding: 25px;
+            box-sizing: border-box;
+        }
+
+        h1 { font-family: 'Rye', cursive; font-size: 2.5em; text-align: center; color: var(--gold); margin: 0 0 20px 0; border-bottom: 2px solid #634b35; padding-bottom: 10px; }
+
+        /* --- MODAL --- */
+        #modal-overlay {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(5px);
+            z-index: 1000; justify-content: center; align-items: center;
+        }
+        .custom-modal {
+            background-color: var(--wood-dark); border: 3px solid var(--gold); padding: 30px; width: 90%; max-width: 400px; text-align: center; border-radius: 10px;
+            animation: modalFadeIn 0.3s ease;
+        }
+        @keyframes modalFadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        .modal-btns { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+        .m-btn { padding: 12px 25px; font-family: 'Rye'; border: 2px solid #000; border-radius: 4px; cursor: pointer; }
+
+        /* --- ANIMOWANE PRZYCISKI --- */
+        button { cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); outline: none; border-radius: 4px; border: none; }
+        button:active { transform: translateY(3px) scale(0.98) !important; }
+
+        .product-btn { background-color: #4a3625; border: 1px solid #634b35; color: #e3d5b8; padding: 15px; text-align: left; }
+        .product-btn:hover { background-color: #5c4533; border-color: var(--gold); transform: scale(1.03); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .product-btn strong { display: block; font-family: 'Rye'; font-size: 1.1em; color: #fff; margin-bottom: 5px; }
+
+        .sell-btn { background-color: var(--green); color: #fff; font-family: 'Rye'; border: 2px solid #000; padding: 15px; font-size: 1.2em; box-shadow: 0 4px 0 #0d2616; width: 100%; }
+        .sell-btn:hover { background-color: var(--green-bright); border-color: var(--gold); box-shadow: 0 4px 0 #0d2616, 0 0 20px rgba(45, 106, 65, 0.7); }
+
+        .clear-btn { background-color: var(--red); color: #fff; border: 2px solid #000; padding: 10px; margin-top: 10px; font-family: 'Rye'; box-shadow: 0 4px 0 #3d0f0d; width: 100%; }
+        .clear-btn:hover { background-color: var(--red-bright); box-shadow: 0 4px 0 #3d0f0d, 0 0 20px rgba(163, 38, 32, 0.6); }
+
+        .archive-btn { background-color: #5c3a21; color: #d4c4a8; border: 2px solid var(--gold); padding: 15px; font-family: 'Rye'; width: 100%; box-shadow: 0 4px 0 #2c1e16; }
+        .archive-btn:hover { background-color: #7b4f2d; color: #fff; box-shadow: 0 0 20px rgba(209, 178, 111, 0.4); }
+
+        /* --- WYBÓR PRACOWNIKA --- */
+        .employee-select {
+            width: 100%; padding: 10px; margin-bottom: 10px; background-color: var(--wood-dark);
+            color: var(--gold); border: 1px solid #634b35; font-family: 'Rye'; font-size: 1.1em;
+            border-radius: 4px; outline: none; text-align: center; cursor: pointer;
+        }
+
+        /* --- TABS --- */
+        .tabs { display: flex; justify-content: center; flex-wrap: wrap; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #634b35; }
+        .tab-btn { background: transparent; border: none; color: #997b5e; padding: 10px 15px; font-family: 'Rye'; font-size: 1.1em; transition: 0.3s; }
+        .tab-btn:hover { color: var(--gold); transform: translateY(-2px); }
+        .tab-btn.active { color: var(--gold); border-bottom: 3px solid var(--gold); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* --- UKŁADY --- */
+        .pos-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .products-section { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .receipt-section { background-color: rgba(0,0,0,0.6); border: 2px solid #4a3625; padding: 15px; border-radius: 5px; }
+        .receipt-section ul { list-style: none; padding: 0; min-height: 250px; border-bottom: 1px dashed #634b35; }
+        .total-row { font-size: 1.3em; font-weight: bold; color: var(--gold); display: flex; justify-content: space-between; margin-bottom: 15px; font-family: 'Rye'; }
+        
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .summary-box { background-color: var(--green); border: 1px solid var(--gold); padding: 15px; border-radius: 5px; text-align: center; margin-bottom: 20px; }
+        .summary-box.treasury { background-color: #5c4533; }
+        .big-total { font-size: 2.5em; color: var(--gold); font-family: 'Rye'; margin: 0; }
+        .stats-panel { background-color: #17120e; border: 1px solid #634b35; padding: 15px; border-radius: 3px; }
+        
+        .report-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #4a3625; }
+        .report-label { color: var(--gold); font-family: 'Rye'; font-size: 0.9em; }
+        .report-val { color: white; font-weight: bold; }
+
+        .kitchen-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .recipe-card { background: var(--parchment); color: #241c15; padding: 15px; border-radius: 3px; border: 1px solid #634b35; }
+        .recipe-card h3 { color: #5c3a21; border-bottom: 1px solid #5c3a21; margin: 0 0 5px 0; font-family: 'Rye'; }
+
+        .history-list { overflow-y: auto; }
+        .history-item { background: rgba(255,255,255,0.05); border-left: 4px solid var(--gold); padding: 10px; margin-bottom: 10px; font-size: 0.85em; line-height: 1.6; }
+        .label { color: var(--gold); font-family: 'Rye'; margin-right: 5px; }
+        .session-info { font-size: 0.8em; text-align: center; color: var(--gold); background: rgba(0,0,0,0.3); padding: 8px; margin-bottom: 20px; border: 1px solid #634b35; font-family: 'Rye'; }
+        
+        /* --- KALKULATOR KUCHNIA --- */
+        .calc-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #4a3625; }
+        .calc-input { width: 60px; background: #17120e; color: var(--gold); border: 1px solid #634b35; padding: 8px; text-align: center; font-weight: bold; font-family: 'Roboto'; border-radius: 4px; outline:none; }
+        .calc-input:focus { border-color: var(--gold); }
+
+        /* DODATEK PROMO */
+        .promo-btn { 
+            background: none; border: 1px solid var(--gold); color: var(--gold); 
+            padding: 2px 5px; font-size: 0.7em; cursor: pointer; border-radius: 3px;
+        }
+
+        @media screen and (max-width: 800px) { .pos-grid, .stats-grid, .kitchen-grid { grid-template-columns: 1fr; } .products-section { grid-template-columns: 1fr 1fr; } }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #634b35; }
+
+        /* --- STYLE KAFELKA ZESTAWU --- */
+        .custom-combo-container { position: relative; display: flex; width: 100%; }
+        .delete-combo-btn { 
+            position: absolute; top: -8px; right: -8px; 
+            background: var(--red-bright); color: white; 
+            border: 2px solid #000; border-radius: 50%; 
+            width: 28px; height: 28px; font-weight: bold; 
+            cursor: pointer; z-index: 10; 
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5); transition: 0.2s;
+        }
+        .delete-combo-btn:hover { transform: scale(1.2); background: #ff3333; }
+/* --- STYLE KREATORA ZESTAWÓW --- */
+        .custom-combo-container { position: relative; display: flex; width: 100%; }
+        .delete-combo-btn { position: absolute; top: -8px; right: -8px; background: var(--red-bright); color: white; border: 2px solid #000; border-radius: 50%; width: 28px; height: 28px; font-weight: bold; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.5); transition: 0.2s; }
+        .delete-combo-btn:hover { transform: scale(1.2); background: #ff3333; }
+        .builder-item { display: flex; align-items: center; padding: 8px 12px; margin-bottom: 6px; border-radius: 4px; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; }
+        .builder-item:hover { background: rgba(209, 178, 111, 0.1); border-color: rgba(209, 178, 111, 0.3); }
+        .builder-cb-input { display: none; }
+        .builder-box { width: 22px; height: 22px; border: 2px solid var(--gold); border-radius: 4px; margin-right: 15px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); transition: all 0.2s; }
+        .builder-cb-input:checked + .builder-box { background: var(--gold); box-shadow: 0 0 8px rgba(209, 178, 111, 0.4); }
+        .builder-cb-input:checked + .builder-box::after { content: '✔'; color: #000; font-weight: bold; font-size: 16px; }
+
+        /* --- KARTKA MAGAZYNU (KUCHNIA) --- */
+.inventory-note {
+    position: fixed;
+    top: 50%;
+    left: 20px;
+    width: 260px;
+    background-color: var(--parchment);
+    color: var(--wood-dark);
+    padding: 25px 20px 20px 20px;
+    box-shadow: 4px 8px 20px rgba(0,0,0,0.7);
+    border-radius: 2px;
+    font-family: 'Roboto', sans-serif;
+    z-index: 100;
+    /* Przesunięcie na środek w pionie i lekkie obrócenie dla realizmu */
+    transform: translateY(-50%) rotate(-3deg);
+    border: 1px solid #c2b296;
+}
+
+/* Plaster mocujący */
+.inventory-note::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%) rotate(5deg);
+    width: 90px;
+    height: 28px;
+    background-color: rgba(220, 200, 180, 0.85);
+    box-shadow: 1px 1px 4px rgba(0,0,0,0.3);
+    border-radius: 2px;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.inventory-title {
+    font-family: 'Rye', cursive;
+    text-align: center;
+    border-bottom: 2px dashed #8c7355;
+    margin: 0 0 15px 0;
+    padding-bottom: 5px;
+    font-size: 1.3em;
+    color: #5c3a21;
+}
+
+.inventory-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 15px 0;
+    /* Usuwamy ograniczenie wysokości, aby schować pasek przewijania */
+    max-height: none; 
+    overflow-y: visible;
+}
+
+.inventory-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* Zmniejszony padding (odstępy z góry i dołu), aby zmieścić więcej elementów */
+    padding: 3px 0; 
+    border-bottom: 1px solid rgba(92, 58, 33, 0.2);
+    /* Nieco mniejsza czcionka */
+    font-size: 0.85em; 
+    font-weight: bold;
+}
+
+.inventory-controls {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.inv-btn {
+    background-color: #5c3a21;
+    color: var(--parchment);
+    border: none;
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    padding: 0;
+    transition: 0.2s;
+}
+
+.inv-btn:hover { background-color: var(--gold); color: #000; transform: scale(1.1); }
+.inv-btn.del-btn { background-color: var(--red-bright); }
+.inv-btn.del-btn:hover { background-color: red; }
+
+.add-inv-box {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: rgba(0,0,0,0.05);
+    padding: 12px;
+    border-radius: 4px;
+    border: 1px dashed #8c7355;
+}
+
+.add-inv-box input {
+    padding: 8px;
+    border: 1px solid #8c7355;
+    border-radius: 3px;
+    background: #fff;
+    color: #000;
+    outline: none;
+    font-weight: bold;
+}
+
+.add-inv-box button {
+    background-color: var(--green);
+    color: white;
+    font-family: 'Rye', cursive;
+    padding: 8px;
+    border: 2px solid #000;
+    cursor: pointer;
+    border-radius: 4px;
+}
+.add-inv-box button:hover { background-color: var(--green-bright); border-color: var(--gold); }
+
+/* Dla mniejszych ekranów chowamy z boku i wpinamy w layout, żeby nie zasłaniało strony */
+@media screen and (max-width: 1400px) {
+    .inventory-note {
+        position: relative;
+        top: 0;
+        left: 0;
+        transform: none;
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+    }
+    .inventory-note::before { display: none; }
+}
+
+/* --- KARTKA GOTOWYCH PRODUKTÓW (Prawa strona) --- */
+.products-note {
+    position: fixed;
+    top: 50%;
+    right: 20px; /* Przyklejona do prawej krawędzi */
+    width: 260px;
+    background-color: var(--parchment);
+    color: var(--wood-dark);
+    padding: 25px 20px 20px 20px;
+    box-shadow: -4px 8px 20px rgba(0,0,0,0.7);
+    border-radius: 2px;
+    font-family: 'Roboto', sans-serif;
+    z-index: 100;
+    /* Przechylona lekko w drugą stronę dla balansu */
+    transform: translateY(-50%) rotate(3deg);
+    border: 1px solid #c2b296;
+}
+
+.products-note::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-5deg);
+    width: 90px;
+    height: 28px;
+    background-color: rgba(220, 200, 180, 0.85);
+    box-shadow: 1px 1px 4px rgba(0,0,0,0.3);
+    border-radius: 2px;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+/* Wygląd ilości na przyciskach kasy */
+.stock-badge {
+    display: block;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    font-size: 0.8em;
+    padding: 3px 6px;
+    border-radius: 8px;
+    margin-top: 5px;
+    font-family: monospace;
+    font-weight: bold;
+}
+
+/* Wersja mobilna/tablet (odklejenie prawej kartki na mniejszych ekranach) */
+@media screen and (max-width: 1400px) {
+    .products-note {
+        position: relative;
+        top: 0;
+        right: 0;
+        transform: none;
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+    }
+    .products-note::before { display: none; }
+}
+
+/* --- STYL WŁASNEGO OKIENKA (ALERTY) --- */
+        .custom-alert-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;
+        }
+        .custom-alert-box {
+            background-color: var(--parchment); color: var(--wood-dark);
+            padding: 30px; border-radius: 4px; border: 3px solid #634b35;
+            box-shadow: inset 0 0 20px rgba(99, 75, 53, 0.2), 4px 8px 30px rgba(0,0,0,0.9);
+            text-align: center; max-width: 400px; width: 90%; font-family: 'Roboto', sans-serif;
+            position: relative;
+        }
+        .custom-alert-title {
+            font-family: 'Rye', cursive; font-size: 1.8em; color: var(--red-bright);
+            margin-top: 0; border-bottom: 2px dashed #8c7355; padding-bottom: 10px; margin-bottom: 20px;
+        }
+        .custom-alert-msg { font-size: 1.1em; font-weight: bold; margin-bottom: 25px; line-height: 1.6; }
+        .custom-alert-btn {
+            background-color: #5c3a21; color: var(--parchment); font-family: 'Rye', cursive;
+            border: 2px solid #000; padding: 10px 30px; font-size: 1.2em; cursor: pointer;
+            border-radius: 4px; transition: 0.2s;
+        }
+        .custom-alert-btn:hover { background-color: var(--red-bright); color: #fff; border-color: var(--gold); transform: scale(1.05); }
