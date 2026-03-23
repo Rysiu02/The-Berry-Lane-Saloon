@@ -217,6 +217,17 @@
             <button class="custom-alert-btn" onclick="closeCustomAlert()">ZROZUMIANO</button>
         </div>
     </div>
+
+    <div id="receipts-modal-overlay" class="custom-alert-overlay" style="z-index: 10000;">
+        <div class="custom-alert-box" style="max-width: 600px; width: 95%; max-height: 90vh; display: flex; flex-direction: column; background-color: var(--parchment); color: var(--wood-dark);">
+            <h2 class="custom-alert-title" id="receipts-modal-title" style="color: var(--wood-dark); border-bottom: 2px dashed #8c7355; margin-bottom: 10px; font-size: 1.5em;">Księga Paragonów</h2>
+            <div id="receipts-modal-content" style="overflow-y: auto; text-align: left; flex-grow: 1; padding: 15px; font-family: 'Roboto'; border: 1px solid rgba(0,0,0,0.1); border-radius: 5px; background: rgba(255,255,255,0.4);">
+                Ładowanie...
+            </div>
+            <button class="m-btn" onclick="closeReceiptsModal()" style="background:var(--wood-dark); color:var(--parchment); margin-top: 20px; align-self: center; border-color: var(--gold);">ZAMKNIJ KARTKĘ</button>
+        </div>
+    </div>
+    
     <script type="module" src="script.js"></script>
 </body>
 </html>

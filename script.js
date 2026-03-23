@@ -1,5 +1,5 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, query, orderBy, setDoc, doc, getDoc, updateDoc, increment, serverTimestamp, addDoc, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, query, orderBy, setDoc, doc, getDoc, updateDoc, increment, serverTimestamp, addDoc, limit, getDocs, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCi-Tjj5gTUzNvCtxi1gFZKRTrIqbOrE8I",
@@ -409,7 +409,11 @@ window.closePromoModal = () => {
                 const list = document.getElementById('payout-history-list');
                 list.innerHTML = s.docs.map(doc => {
                     const p = doc.data();
-                    return `<div class="history-item"><span class="label">${p.date}</span><br><b>${p.employee}</b>: <span style="color:#aaffaa">$${p.amount.toFixed(2)}</span></div>`;
+                    // Dodano akcję onclick, która otwiera modal i przekazuje imię oraz zmianę
+                    return `<div class="history-item" style="cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='rgba(209, 178, 111, 0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'" onclick="showEmployeeReceipts('${p.employee}', '${p.session}')">
+                        <span class="label">${p.date}</span><br>
+                        <b>${p.employee}</b>: <span style="color:#aaffaa">$${p.amount.toFixed(2)}</span>
+                    </div>`;
                 }).join('') || '<p style="text-align:center; opacity:0.5;">Brak historii wypłat...</p>';
             });
         }
@@ -867,4 +871,70 @@ window.closePromoModal = () => {
         };
         window.closeCustomAlert = () => {
             document.getElementById('customAlertOverlay').style.display = 'none';
+        };
+
+        // --- WYŚWIETLANIE SZCZEGÓŁÓW ROZLICZENIA NA DUŻEJ KARTCE ---
+        window.showEmployeeReceipts = async (employee, session) => {
+            const modalOverlay = document.getElementById('receipts-modal-overlay');
+            const contentDiv = document.getElementById('receipts-modal-content');
+            
+            document.getElementById('receipts-modal-title').innerText = `Rozliczenie: ${employee}`;
+            contentDiv.innerHTML = '<p style="text-align:center; font-family:\'Rye\'; font-size:1.2em; padding: 20px;">Odkurzam księgi i szukam paragonów...</p>';
+            modalOverlay.style.display = 'flex';
+
+            try {
+                // Szukamy paragonów, gdzie zgadza się nazwa zmiany (session) oraz kasjer (employee)
+                const q = query(collection(db, "berry_lane_pos"), where("sessionName", "==", session), where("customer", "==", employee));
+                const snapshot = await getDocs(q);
+                
+                if (snapshot.empty) {
+                    contentDiv.innerHTML = '<p style="text-align:center; padding: 20px;">Brak paragonów dla tej osoby podczas wskazanej zmiany.</p>';
+                    return;
+                }
+
+                let html = '';
+                let totalSum = 0;
+
+                // Segregujemy paragony od najnowszego do najstarszego
+                const receipts = [];
+                snapshot.forEach(doc => receipts.push(doc.data()));
+                receipts.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
+
+                receipts.forEach(data => {
+                    const dateStr = data.createdAt ? data.createdAt.toDate().toLocaleTimeString('pl-PL') : 'Brak czasu';
+                    totalSum += data.totalPrice || 0;
+                    
+                    html += `<div style="border: 2px dashed #8c7355; padding: 10px; margin-bottom: 15px; border-radius: 5px; background: rgba(0,0,0,0.03);">
+                        <div style="border-bottom: 1px solid #8c7355; padding-bottom: 5px; margin-bottom: 10px; font-family: 'Rye'; font-size: 1.1em; display: flex; justify-content: space-between;">
+                            <span>⏱️ ${dateStr}</span>
+                            <span style="color: var(--green-bright); font-weight: bold;">$${(data.totalPrice || 0).toFixed(2)}</span>
+                        </div>
+                        <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.95em; color: #4a3625;">`;
+                    
+                    (data.items || []).forEach(item => {
+                        html += `<li style="display:flex; justify-content:space-between; margin-bottom: 4px; border-bottom: 1px dotted rgba(0,0,0,0.1);">
+                            <span><b>${item.quantity}x</b> ${item.name}</span>
+                            <span>$${(item.finalPrice * item.quantity).toFixed(2)}</span>
+                        </li>`;
+                    });
+                    
+                    html += `</ul></div>`;
+                });
+
+                // Nagłówek z zsumowanym utargiem dla tego pracownika
+                html = `<div style="text-align:center; font-family:'Rye'; font-size:1.3em; color:var(--red-bright); margin-bottom:20px; border-bottom:3px double #8c7355; padding-bottom:10px;">
+                    Wypracowany utarg (Brutto): $${totalSum.toFixed(2)}
+                </div>` + html;
+
+                contentDiv.innerHTML = html;
+
+            } catch (e) {
+                console.error(e);
+                contentDiv.innerHTML = '<p style="text-align:center; color:red; font-weight:bold;">Wystąpił błąd podczas czytania ksiąg.</p>';
+            }
+        };
+
+        // Zamykanie kartki
+        window.closeReceiptsModal = () => {
+            document.getElementById('receipts-modal-overlay').style.display = 'none';
         };
