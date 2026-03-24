@@ -934,7 +934,169 @@ window.closePromoModal = () => {
             }
         };
 
+        
         // Zamykanie kartki
         window.closeReceiptsModal = () => {
             document.getElementById('receipts-modal-overlay').style.display = 'none';
         };
+
+// =========================================================
+// ZAKŁADKA SKUPU TOWARU
+// =========================================================
+
+const skupData = [
+    { name: 'Pszenica', price: 0.5 },
+    { name: 'Jabłko', price: 0.6 },
+    { name: 'Marchew', price: 0.5 },
+    { name: 'Jajka', price: 0.6 },
+    { name: 'Mleko', price: 1.0 },
+    { name: 'Jagody', price: 0.3 },
+    { name: 'Ziemniak', price: 0.5 },
+    { name: 'Kukurydza', price: 0.5 },
+    { name: 'Czerwona Malina', price: 0.5 },
+    { name: 'Mięso Drobiowe', price: 0.7 },
+    { name: 'Mięso', price: 0.6 },
+    { name: 'Ryba', price: 1.0 },
+    { name: 'Woda', price: 0.55 },
+];
+
+let skupCart = {};
+
+// Generowanie kafelków towarów (TERAZ JAKO WINDOW)
+window.renderSkupGrid = () => {
+    const grid = document.getElementById('skup-grid');
+    if(!grid) return;
+    
+    grid.innerHTML = skupData.map(item => `
+        <div class="menu-item" style="cursor: pointer; background: var(--wood-medium); padding: 15px; border: 2px solid #634b35; border-radius: 5px; text-align: center;" 
+             onclick="window.addSkupItem('${item.name}', ${item.price})">
+            <strong style="font-size:1.2em; color: var(--parchment); display:block;">${item.name}</strong>
+            <span style="color:var(--green-bright); font-weight:bold;">$${item.price.toFixed(2)}</span>
+        </div>
+    `).join('');
+};
+// Funkcja dodawania do listy
+window.addSkupItem = (name, price) => {
+    const modal = document.getElementById('skup-modal-overlay');
+    const text = document.getElementById('skup-modal-text');
+    const input = document.getElementById('skup-qty-input');
+    const confirmBtn = document.getElementById('skup-confirm-btn');
+
+    text.innerText = `Ile sztuk [ ${name} ] kupujesz od dostawcy?`;
+    input.value = 1;
+
+    modal.style.display = 'flex';
+
+    confirmBtn.onclick = () => {
+        const qty = parseInt(input.value);
+
+        if (isNaN(qty) || qty <= 0) {
+            window.showCustomAlert("Podano nieprawidłową ilość!");
+            return;
+        }
+
+        if (skupCart[name]) {
+            skupCart[name].qty += qty;
+        } else {
+            skupCart[name] = { price: price, qty: qty };
+        }
+
+        window.updateSkupUI();
+        closeSkupModal();
+    };
+};
+window.closeSkupModal = () => {
+    document.getElementById('skup-modal-overlay').style.display = 'none';
+};
+
+// Odświeżanie rachunku skupu
+window.updateSkupUI = () => {
+    const list = document.getElementById('skup-list');
+    const totalSpan = document.getElementById('skup-total');
+    let total = 0;
+    let html = '';
+
+    for (let [name, data] of Object.entries(skupCart)) {
+        const sum = data.price * data.qty;
+        total += sum;
+        html += `<li style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px dotted rgba(255,255,255,0.2); padding-bottom:5px;">
+    
+    <span>${name}</span>
+    
+    <div style="display:flex; align-items:center; gap:8px;">
+        
+        <button onclick="decreaseSkupItem('${name}')"
+            style="background:#444; color:white; border:none; border-radius:4px; width:24px; height:24px; cursor:pointer;">−</button>
+        
+        <span style="min-width:30px; text-align:center;"><b>${data.qty}</b></span>
+        
+        <button onclick="increaseSkupItem('${name}')"
+            style="background:var(--green); color:white; border:none; border-radius:4px; width:24px; height:24px; cursor:pointer;">+</button>
+        
+        <span style="color:#aaffaa; margin-left:10px;">$${sum.toFixed(2)}</span>
+        
+        <button onclick="removeSkupItem('${name}')"
+            style="background:var(--red-bright); color:white; border:none; border-radius:4px; padding:3px 8px; cursor:pointer; margin-left:5px;">
+            ✖
+        </button>
+    </div>
+</li>`;
+    }
+
+    list.innerHTML = html || '<li style="opacity:0.5;">Wybierz towar z listy po lewej...</li>';
+    totalSpan.innerText = total.toFixed(2);
+};
+
+// Czyszczenie skupu
+window.clearSkup = () => {
+    showConfirmModal(
+        "Wyczyścić listę?",
+        "Czy na pewno chcesz usunąć wszystkie produkty ze skupu?",
+        () => {
+            skupCart = {};
+            window.updateSkupUI();
+        }
+    );
+};
+window.showConfirmModal = (title, message, onConfirm) => {
+    const overlay = document.getElementById('modal-overlay');
+    const titleEl = document.getElementById('modal-title');
+    const msgEl = document.getElementById('modal-message');
+    const confirmBtn = document.getElementById('modal-confirm-btn');
+
+    titleEl.innerText = title;
+    msgEl.innerText = message;
+
+    overlay.style.display = 'flex';
+
+    confirmBtn.onclick = () => {
+        overlay.style.display = 'none';
+        onConfirm();
+    };
+};
+
+window.increaseSkupItem = (name) => {
+    skupCart[name].qty += 1;
+    window.updateSkupUI();
+};
+
+window.decreaseSkupItem = (name) => {
+    skupCart[name].qty -= 1;
+
+    if (skupCart[name].qty <= 0) {
+        delete skupCart[name];
+    }
+
+    window.updateSkupUI();
+};
+
+window.removeSkupItem = (name) => {
+    showConfirmModal(
+        "Usuń produkt",
+        `Czy chcesz usunąć ${name} z listy skupu?`,
+        () => {
+            delete skupCart[name];
+            window.updateSkupUI();
+        }
+    );
+};

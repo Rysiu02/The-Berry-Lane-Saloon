@@ -362,3 +362,32 @@
             border-radius: 4px; transition: 0.2s;
         }
         .custom-alert-btn:hover { background-color: var(--red-bright); color: #fff; border-color: var(--gold); transform: scale(1.05); }
+
+        /* Układ dla nowej zakładki Skupu */
+.split-layout {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.menu-panel {
+    flex: 2; /* Lewa strona jest szersza */
+}
+
+.stats-panel {
+    flex: 1; /* Prawa strona (rachunek) jest węższa */
+    background: rgba(0,0,0,0.2);
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #634b35;
+}
+
+/* Styl dla kafelków w skupie, aby pasowały do reszty POS */
+#skup-grid .menu-item:hover {
+    background-color: var(--gold) !important;
+    color: var(--wood-dark) !important;
+}
+
+#skup-grid .menu-item strong {
+    pointer-events: none; /* Żeby kliknięcie w napis też działało */
+}
