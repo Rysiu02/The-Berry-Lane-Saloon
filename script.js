@@ -1,5 +1,5 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, query, orderBy, setDoc, doc, getDoc, updateDoc, increment, serverTimestamp, addDoc, limit, getDocs, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, query, orderBy, setDoc, doc, getDoc, updateDoc, increment, serverTimestamp, addDoc, limit, getDocs, where, deleteDoc} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCi-Tjj5gTUzNvCtxi1gFZKRTrIqbOrE8I",
@@ -511,7 +511,7 @@ window.closePromoModal = () => {
                 });
 
                 document.getElementById('payout-clara').innerText = `$${grossClara.toFixed(2)}`;
-                document.getElementById('payout-thomas').innerText = `$${((grossThomas * 0.50) + 100).toFixed(2)}`;
+                document.getElementById('payout-thomas').innerText = `$${(grossThomas + 100).toFixed(2)}`;
                 
                 let bestItem = "---"; let maxQty = 0;
                 Object.entries(allTimeItemCounts).forEach(([name, qty]) => { if(qty > maxQty) { maxQty = qty; bestItem = name; } });
@@ -1010,6 +1010,8 @@ window.closeSkupModal = () => {
 };
 
 // Odświeżanie rachunku skupu
+// Odświeżanie rachunku skupu (teraz z guzikiem usuwania)
+// Odświeżanie rachunku skupu (z plusami, minusami i przyciskiem usuwania X)
 window.updateSkupUI = () => {
     const list = document.getElementById('skup-list');
     const totalSpan = document.getElementById('skup-total');
@@ -1019,44 +1021,34 @@ window.updateSkupUI = () => {
     for (let [name, data] of Object.entries(skupCart)) {
         const sum = data.price * data.qty;
         total += sum;
-        html += `<li style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px dotted rgba(255,255,255,0.2); padding-bottom:5px;">
-    
-    <span>${name}</span>
-    
-    <div style="display:flex; align-items:center; gap:8px;">
         
-        <button onclick="decreaseSkupItem('${name}')"
-            style="background:#444; color:white; border:none; border-radius:4px; width:24px; height:24px; cursor:pointer;">−</button>
-        
-        <span style="min-width:30px; text-align:center;"><b>${data.qty}</b></span>
-        
-        <button onclick="increaseSkupItem('${name}')"
-            style="background:var(--green); color:white; border:none; border-radius:4px; width:24px; height:24px; cursor:pointer;">+</button>
-        
-        <span style="color:#aaffaa; margin-left:10px;">$${sum.toFixed(2)}</span>
-        
-        <button onclick="removeSkupItem('${name}')"
-            style="background:var(--red-bright); color:white; border:none; border-radius:4px; padding:3px 8px; cursor:pointer; margin-left:5px;">
-            ✖
-        </button>
-    </div>
-</li>`;
+        html += `<li style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px dotted rgba(255,255,255,0.2); padding-bottom: 8px;">
+            
+            <div style="flex: 1; display:flex; align-items:center; gap: 10px;">
+                <div style="display:flex; gap: 3px;">
+                    <button onclick="window.decreaseSkupItem('${name}')" style="background:#555; color:white; border:1px solid #960606; border-radius:3px; cursor:pointer; padding:2px 8px; font-weight:bold;">-</button>
+                    <span style="background: rgba(0,0,0,0.3); padding: 2px 8px; min-width: 20px; text-align: center; border-radius: 3px;"><b>${data.qty}</b></span>
+                    <button onclick="window.increaseSkupItem('${name}')" style="background:#555; color:white; border:1px solid #016d25; border-radius:3px; cursor:pointer; padding:2px 8px; font-weight:bold;">+</button>
+                </div>
+                <span>${name}</span>
+            </div>
+
+            <div style="display:flex; align-items:center; gap: 15px;">
+                <span style="color:#aaffaa; font-weight:bold;">$${sum.toFixed(2)}</span>
+                <button onclick="window.removeSkupItem('${name}')" style="background: var(--red-bright); color: white; border: 1px solid #000; border-radius: 3px; padding: 2px 10px; cursor: pointer; font-weight: bold; box-shadow: 2px 2px 0px #000;">X</button>
+            </div>
+
+        </li>`;
     }
 
     list.innerHTML = html || '<li style="opacity:0.5;">Wybierz towar z listy po lewej...</li>';
     totalSpan.innerText = total.toFixed(2);
 };
 
-// Czyszczenie skupu
-window.clearSkup = () => {
-    showConfirmModal(
-        "Wyczyścić listę?",
-        "Czy na pewno chcesz usunąć wszystkie produkty ze skupu?",
-        () => {
-            skupCart = {};
-            window.updateSkupUI();
-        }
-    );
+// Funkcja całkowitego usuwania przedmiotu ze skupu
+window.removeSkupItem = (name) => {
+    delete skupCart[name];
+    window.updateSkupUI();
 };
 window.showConfirmModal = (title, message, onConfirm) => {
     const overlay = document.getElementById('modal-overlay');
@@ -1099,4 +1091,133 @@ window.removeSkupItem = (name) => {
             window.updateSkupUI();
         }
     );
+};
+// =========================================================
+// BAZA DANYCH & HISTORIA DLA SKUPU
+// =========================================================
+
+const skupHistoryCol = collection(db, "berry_lane_skup_history");
+
+// Funkcja 1: Zapisywanie Skupu do Firebase
+// Funkcja 1: Zapisywanie Skupu do Firebase (Z KLIMATYCZNYM ALERTEM)
+// Funkcja 1: Zapisywanie Skupu do Firebase (Z Imieniem Pracownika)
+window.saveSkupPurchase = async () => {
+    const total = parseFloat(document.getElementById('skup-total').innerText);
+    
+    if (total <= 0 || Object.keys(skupCart).length === 0) {
+        window.showCustomAlert("Księga skupu jest pusta. Dodaj towary przed zapisem!");
+        return;
+    }
+
+    // Pobieramy imię pracownika z głównej zakładki POS
+    const currentEmployee = document.getElementById('employee-select').value;
+
+    window.showConfirmModal(
+        "Zatwierdzenie Skupu",
+        `Czy na pewno chcesz zatwierdzić skup na kwotę $${total.toFixed(2)}?\nTowar przyjmuje: ${currentEmployee}.`,
+        async () => {
+            try {
+                const purchaseData = {
+                    items: skupCart,
+                    totalPrice: total,
+                    createdAt: serverTimestamp(),
+                    sessionName: document.getElementById('session-display').innerText.replace('Bieżąca zmiana: ', ''),
+                    employeeName: currentEmployee // Dodajemy pracownika do bazy!
+                };
+
+                await addDoc(skupHistoryCol, purchaseData);
+
+                skupCart = {};
+                window.updateSkupUI();
+                window.showCustomAlert(`Skup zapisany w Księdze Towaru przez: ${currentEmployee}. Do wypłaty: $${total.toFixed(2)}`);
+
+            } catch (e) {
+                console.error("Błąd zapisu skupu:", e);
+                window.showCustomAlert("Nie udało się zapisać skupu. Sprawdź połączenie.");
+            }
+        }
+    );
+};
+
+// Funkcja 2: Wyświetlanie Historii (Z Imieniem Pracownika)
+window.showSkupHistory = async () => {
+    const modal = document.getElementById('skup-history-modal-overlay');
+    const content = document.getElementById('skup-history-modal-content');
+    
+    modal.style.display = 'flex';
+    content.innerHTML = '<p style="text-align:center; font-family:\'Rye\'; font-size:1.2em;">Odkurzam stare księgi skupu...</p>';
+
+    try {
+        const q = query(skupHistoryCol, orderBy("createdAt", "desc"), limit(30));
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+            content.innerHTML = '<p style="text-align:center; opacity:0.6; padding:20px;">Księga skupu jest na razie pusta.</p>';
+            return;
+        }
+
+        let html = '';
+        snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            const docId = docSnap.id; 
+            const dateStr = data.createdAt ? data.createdAt.toDate().toLocaleString('pl-PL') : 'Brak daty';
+            
+            html += `<div style="border: 2px dashed #8c7355; padding: 15px; margin-bottom: 20px; border-radius: 5px; background: rgba(0,0,0,0.03); position: relative;">
+                
+                <button onclick="window.deleteSkupHistoryItem('${docId}')" style="position: absolute; top: 10px; right: 10px; background: var(--red-bright); color: white; border: 1px solid #000; border-radius: 3px; cursor: pointer; font-weight: bold; padding: 5px 10px; box-shadow: 2px 2px 0px #000;">X USUŃ WPIS</button>
+                
+                <div style="border-bottom: 1px dotted #8c7355; padding-bottom: 8px; margin-bottom: 10px; font-family: 'Rye'; font-size: 1.1em; display: flex; flex-direction: column; color: var(--wood-dark); padding-right: 100px;">
+                    <span>📅 ${dateStr}</span>
+                    <span style="color: var(--green-bright); font-weight: bold; margin-top: 5px;">Suma: $${(data.totalPrice || 0).toFixed(2)}</span>
+                </div>
+                
+                <div style="font-size:0.95em; color:#444; margin-bottom:10px; font-weight: bold;">
+                    👤 Przyjął/ęła: <span style="color:var(--red-bright);">${data.employeeName || 'Nieznany pracownik'}</span>
+                </div>
+                <div style="font-size:0.85em; color:#888; margin-bottom:10px; font-style: italic;">
+                    Zmiana: ${data.sessionName || 'Nieznana'}
+                </div>
+
+                <ul style="list-style: none; padding: 0; margin: 0; color: #4a3625; font-size: 0.95em;">`;
+
+            Object.entries(data.items || {}).forEach(([name, details]) => {
+                html += `<li style="display:flex; justify-content:space-between; margin-bottom: 4px; border-bottom: 1px dotted rgba(0,0,0,0.1);">
+                    <span><b>${details.qty}x</b> ${name}</span>
+                    <span>$${(details.price * details.qty).toFixed(2)}</span>
+                </li>`;
+            });
+
+            html += `</ul></div>`;
+        });
+
+        content.innerHTML = html;
+
+    } catch (e) {
+        console.error("Błąd pobierania historii:", e);
+        content.innerHTML = '<p style="text-align:center; color:red; font-weight:bold;">Wystąpił błąd przy czytaniu ksiąg...</p>';
+    }
+};
+
+// NOWA FUNKCJA: Usuwanie wpisu z bazy danych Firebase
+window.deleteSkupHistoryItem = (docId) => {
+    window.showConfirmModal(
+        "Spalenie wpisu",
+        "Czy na pewno chcesz wyrwać tę kartę z Księgi Skupu? Ta akcja jest nieodwracalna!",
+        async () => {
+            try {
+                // Usuwa dokument o konkretnym ID z bazy Firebase
+                await deleteDoc(doc(db, "berry_lane_skup_history", docId));
+                window.showCustomAlert("Wpis został wymazany z historii.");
+                window.showSkupHistory(); // Od razu odświeża księgę, żeby wpis zniknął z ekranu
+            } catch (e) {
+                console.error("Błąd usuwania wpisu: ", e);
+                window.showCustomAlert("Nie udało się usunąć wpisu. Sprawdź połączenie.");
+            }
+        }
+    );
+};
+
+// Funkcja 3: Zamykanie Historii
+window.closeSkupHistoryModal = () => {
+    document.getElementById('skup-history-modal-overlay').style.display = 'none';
 };
