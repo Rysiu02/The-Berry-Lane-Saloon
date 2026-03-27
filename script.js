@@ -956,6 +956,7 @@ const skupData = [
     { name: 'Czerwona Malina', price: 0.5 },
     { name: 'Mięso Drobiowe', price: 0.7 },
     { name: 'Mięso', price: 0.6 },
+    { name: 'Wołowina', price: 1.0 },
     { name: 'Ryba', price: 1.0 },
     { name: 'Woda', price: 0.55 },
 ];
@@ -1220,4 +1221,62 @@ window.deleteSkupHistoryItem = (docId) => {
 // Funkcja 3: Zamykanie Historii
 window.closeSkupHistoryModal = () => {
     document.getElementById('skup-history-modal-overlay').style.display = 'none';
+};
+// ==========================================
+// NAPRAWA: FUNKCJE KALKULATORA KUCHNI
+// ==========================================
+
+window.increaseCalcQty = (index) => {
+    const input = document.getElementById(`calc-qty-${index}`);
+    if (input) {
+        input.value = parseInt(input.value) + 1;
+        window.calculateIngredients();
+    }
+};
+
+window.decreaseCalcQty = (index) => {
+    const input = document.getElementById(`calc-qty-${index}`);
+    if (input && parseInt(input.value) > 1) {
+        input.value = parseInt(input.value) - 1;
+        window.calculateIngredients();
+    }
+};
+
+window.calculateIngredients = () => {
+    const inputs = document.querySelectorAll('.calc-input');
+    const resultsUl = document.getElementById('calc-results');
+    let totalIngredients = {};
+    let hasItems = false;
+
+    inputs.forEach(input => {
+        const qty = parseInt(input.value);
+        if (qty > 0) {
+            hasItems = true;
+            const index = input.id.split('-')[2];
+            const recipeStr = menuData[index].r;
+            
+            if (recipeStr && recipeStr !== 'Brak') {
+                const parts = recipeStr.split(',');
+                parts.forEach(part => {
+                    const [amountStr, name] = part.trim().split('x ');
+                    if (amountStr && name) {
+                        const amount = parseInt(amountStr) * qty;
+                        totalIngredients[name] = (totalIngredients[name] || 0) + amount;
+                    }
+                });
+            }
+        }
+    });
+
+    if (!hasItems) {
+        resultsUl.innerHTML = '<li style="opacity:0.5;">Wybierz coś z listy obok, aby przeliczyć...</li>';
+        return;
+    }
+
+    resultsUl.innerHTML = Object.entries(totalIngredients).map(([name, qty]) => {
+        return `<li style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px dotted rgba(255,255,255,0.2); padding-bottom:5px;">
+            <span style="color:var(--parchment);">${name}</span>
+            <span style="color:var(--gold); font-weight:bold;">${qty} szt.</span>
+        </li>`;
+    }).join('');
 };
